@@ -1,59 +1,69 @@
-# TokoDCFormGenerator
+# Tokotna DC Form Generator
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+An Angular web app that turns Tokotna Geno and lineage information into copy-ready Design Central Import and Design Central forms.
 
-## Development server
+## Requirements
 
-To start a local development server, run:
+- Node.js and npm
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run locally
 
 ```bash
-ng generate component component-name
+npm install
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Open [http://localhost:4200](http://localhost:4200). The development server reloads when source files change.
+
+## Use the generator
+
+1. Paste the Geno into **Geno**. For an on-site Geno, paste from **Build** through **Lineage**.
+2. Paste litter or lineage information into **Litter or Abando Result**.
+3. Enter the required proof-of-ownership link, owner (or tribe), and designer.
+4. Review the parsed physical traits. Check **Carried** where applicable.
+5. Optionally add physical traits, select a special base coat, configure Soul Pool decor, or fill in names and design credits.
+6. Choose a Design Central form type and select **Generate result**.
+7. Review both generated forms for correctness before copying them.
+
+Required fields and values that need manual attention are highlighted in red. The app does not submit forms to Tokotna.
+
+## Geno parsing
+
+The parser supports standard Geno text as well as labeled fields whose values appear on the same line or the following line. It recognizes gender, mane, genotype, phenotype, hierarchy, health, build, breed, physical traits, hereditary/non-physical traits, and lineage.
+
+Trait sections may use headers such as `--Physical Traits:--`, `Hereditary Traits:`, or `Non-Physical Traits`. List prefixes and an existing `Trait -` prefix are removed before traits are formatted in the Import Form.
+
+Build and mane values are checked against registries in `src/app/app.ts`:
+
+- `BUILD_TYPES` maps a Geno line to its breed. Matching is case-insensitive and checks whether a normalized Geno line contains the configured `genoLine`. Current mappings include Tokota, Tokhara, Sinaka, Odonyx, Akota, Dakino, Miralta, Makhata, Toki, and Dire percentages from 10% to 100%.
+- `MANE_TYPES` lists the accepted mane names. Unrecognized mane values are highlighted for review.
+- `ADDABLE_PHYSICAL_TRAIT_NAMES` lists physical traits available when **ADDING TRAITS** is enabled.
+
+To add a build, append an entry to `BUILD_TYPES`, for example:
+
+```ts
+{ genoLine: 'New Build', breed: 'Canarctos example' },
+```
+
+The Geno line must contain the configured `genoLine`. Because matching uses containment, choose a distinctive string to avoid unintended matches.
+
+## Optional form features
+
+- **Physical traits:** Geno physical traits can be marked as carried. Added traits are included in the Import Form; adding traits requires Soul Pool and lists one SPW per added trait in the Design Central form.
+- **Soul Pool:** Select decor and quantities. BG Stones are limited to one item with a quantity of one.
+- **Special Base Coat:** Shows coat choices detected from the Geno and validates selections against the detected bases.
+- **Lineage:** Sire, Dam, and Tokotna ancestry IDs/links can be read from the Geno or the litter/lineage input.
+- **Form type:** Main Thread, New Members, Design Den, or Soul Pool.
+
+## Commands
 
 ```bash
-ng generate --help
+npm start       # Start the development server
+npm run build   # Create a production build in dist/
+npm test        # Run the configured unit-test runner
 ```
 
-## Building
+## Technology
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Angular
+- Bootstrap 5
