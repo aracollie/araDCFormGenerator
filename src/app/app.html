@@ -237,22 +237,6 @@
         <details class="card bg-light mb-3" aria-label="Soul Pool special items">
           <summary class="card-header fw-semibold">Special Items</summary>
           <div class="card-body">
-            <div class="border rounded bg-white p-3">
-              <div class="form-check mb-3">
-                <input
-                  id="useHpTokens"
-                  class="form-check-input"
-                  type="checkbox"
-                  [ngModel]="useHpTokens"
-                  (ngModelChange)="setUseHpTokens($event)"
-                />
-                <label class="form-check-label fw-semibold" for="useHpTokens">
-                  Use HP Tokens to move to Average
-                </label>
-                <div class="form-text">
-                  Uses 35 HP Tokens and switches the Design Central form to Soul Pool.
-                </div>
-              </div>
               @if (isSubmissive) {
                 <div class="form-check mb-3">
                   <input
