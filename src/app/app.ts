@@ -2,6 +2,16 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 const BASE_COAT_ORDER = ['Tundra', 'Tawny', 'Brown', 'Black'] as const;
+const HEALTH_STATUSES = ['Healthy', 'Inbred'] as const;
+const HEALTH_DEFECTS = [
+  'Infertile',
+  'Sterile',
+  'Spinal Defects',
+  'Blind',
+  'Deaf',
+  'Frail',
+  'Lame',
+] as const;
 const BUILD_TYPES = [
   { genoLine: 'Tokota', breed: 'Canarctos venatori' },
   { genoLine: 'Tokhara', breed: 'Canarctos fervidus' },
@@ -52,6 +62,7 @@ type DecorOption = { name: string; checked: boolean; quantity: number | null };
 type DecorGroup = { type: string; options: DecorOption[] };
 type GenoPhysicalTrait = { name: string; carried: boolean };
 type AddablePhysicalTrait = { name: string; selected: boolean; carried: boolean };
+type GenderChangeMethod = 'potaToken' | 'metamorphosisMixture';
 
 const ADDABLE_PHYSICAL_TRAIT_NAMES = [
   'Beard',
@@ -92,6 +103,12 @@ export class App {
   protected ownerOrTribe = '';
   protected tribeOwned = false;
   protected soulPool = false;
+  protected useHpTokens = false;
+  protected usePotaRevive = false;
+  protected usePotaMarkings = false;
+  protected genderChangeMethod: GenderChangeMethod | '' = '';
+  protected potaTokenQuantity: number | null = 1;
+  protected finalGenoAndPheno = '';
   protected formType = 'Main Thread Form';
   protected decorGroups: DecorGroup[] = [
     {
@@ -212,6 +229,7 @@ export class App {
   protected resourcesBy = '';
   protected result = '';
   protected formResult = '';
+  protected massRemoveResult = '';
 
   protected get selectedBaseCoatCount(): number {
     const detectedBases = new Set(this.getBaseCoatSelection().bases);
@@ -249,6 +267,30 @@ export class App {
     return /\s/.test(this.ownerOrTribe);
   }
 
+  protected get isSubmissive(): boolean {
+    return (
+      /^\s*(?:\d+\)\s*)?Submissive\s*-\s*(?:Healthy|Inbred)\b/im.test(this.geno) ||
+      /^\s*Hierarchy(?:\s+Status)?\s*:\s*Submissive\b/im.test(this.geno)
+    );
+  }
+
+  protected get hasDeceasedMarker(): boolean {
+    const lines = this.geno.split(/\r?\n/).map((line) => line.trim());
+    const statusLine = lines.find((line) =>
+      /^(?:Average|Submissive)\s*-\s*(?:Healthy|Inbred)\b/i.test(line),
+    );
+    if (statusLine && /\bDECEASED\b/i.test(statusLine)) return true;
+
+    const healthLabelIndex = lines.findIndex((line) => /^Health Status\s*:/i.test(line));
+    if (healthLabelIndex < 0) return false;
+
+    const inlineHealth = lines[healthLabelIndex].match(/^Health Status\s*:\s*(.*)$/i)?.[1].trim();
+    if (inlineHealth) return /\bDECEASED\b/i.test(inlineHealth);
+
+    const nextHealthLine = lines.slice(healthLabelIndex + 1).find(Boolean);
+    return Boolean(nextHealthLine && /^(?:Healthy|Inbred)\b.*\bDECEASED\b/i.test(nextHealthLine));
+  }
+
   protected get availableBaseCoatGroups(): { base: BaseName; options: BaseCoatOption[] }[] {
     const detectedBases = new Set(this.getBaseCoatSelection().bases);
     return BASE_COAT_ORDER.filter((base) => detectedBases.has(base)).map((base) => ({
@@ -258,8 +300,13 @@ export class App {
   }
 
   protected setSoulPool(enabled: boolean): void {
-    this.soulPool = enabled || this.addingTraits;
+    this.soulPool = enabled || this.addingTraits || this.useHpTokens;
     if (this.soulPool) this.formType = 'Soul Pool Form';
+  }
+
+  protected setUseHpTokens(enabled: boolean): void {
+    this.useHpTokens = enabled && this.isSubmissive;
+    if (this.useHpTokens) this.setSoulPool(true);
   }
 
   protected setAddingTraits(enabled: boolean): void {
@@ -287,6 +334,8 @@ export class App {
     const carriedTraits = new Map<string, boolean>();
     this.genoPhysicalTraits.forEach((trait) => carriedTraits.set(trait.name, trait.carried));
     this.geno = value;
+    if (!this.isSubmissive) this.useHpTokens = false;
+    if (!this.hasDeceasedMarker) this.usePotaRevive = false;
     this.genoPhysicalTraits = this.sectionValues(value, 'Physical Traits')
       .map((trait) => this.normalizePhysicalTrait(trait))
       .filter(Boolean)
@@ -317,6 +366,12 @@ export class App {
     this.ownerOrTribe = '';
     this.tribeOwned = false;
     this.soulPool = false;
+    this.useHpTokens = false;
+    this.usePotaRevive = false;
+    this.usePotaMarkings = false;
+    this.genderChangeMethod = '';
+    this.potaTokenQuantity = 1;
+    this.finalGenoAndPheno = '';
     this.formType = 'Main Thread Form';
     this.specialBaseCoat = false;
     this.designer = '';
@@ -325,6 +380,7 @@ export class App {
     this.resourcesBy = '';
     this.result = '';
     this.formResult = '';
+    this.massRemoveResult = '';
     this.decorGroups
       .flatMap((group) => group.options)
       .forEach((option) => {
@@ -341,6 +397,12 @@ export class App {
     maxSelections: number;
   } {
     const cross = this.geno.match(/\b(Silver|Gold|Bronze)\s+Cross\b/i);
+    const bloodmarked = /\bbloodmark(?:ed)?\b/i.test(this.geno);
+    const isChimera = /\bchimer(?:a|ism)\b/i.test(this.geno) || this.hasChimericGenotype();
+    if (isChimera && (cross || bloodmarked)) {
+      return { bases: [...BASE_COAT_ORDER], maxSelections: 3 };
+    }
+
     if (cross) {
       const crossBases: Record<string, BaseName[]> = {
         Silver: ['Tundra', 'Black'],
@@ -351,7 +413,7 @@ export class App {
       return { bases: crossBases[crossType], maxSelections: 2 };
     }
 
-    if (/\bbloodmark(?:ed)?\b/i.test(this.geno)) {
+    if (bloodmarked) {
       return { bases: ['Tundra', 'Brown'], maxSelections: 2 };
     }
 
@@ -365,7 +427,6 @@ export class App {
     if (roan) return { bases: [roan[1]], maxSelections: 1 };
 
     const phenotype = this.extractPhenotype() ?? this.geno;
-    const isChimera = /\bchimer(?:a|ism)\b/i.test(this.geno) || this.hasChimericGenotype();
     if (isChimera) {
       const sides = phenotype.split(/\s*\/\/\s*/);
       const bases = (sides.length > 1 ? sides.slice(0, 2) : [phenotype])
@@ -479,14 +540,36 @@ export class App {
     var error = false;
     this.result = '';
     this.formResult = '';
-    if (
-      !this.geno.trim() ||
-      !this.litter.trim() ||
-      !this.proofOfOwnership.trim() ||
-      !this.ownerOrTribe.trim() ||
-      !this.designer.trim()
-    ) {
-      this.result += 'Please fill all the required values before generating.';
+    this.massRemoveResult = '';
+    const finalGenoAndPhenoLines = this.usePotaMarkings
+      ? this.finalGenoAndPheno
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+      : [];
+    const hasValidFinalGenoAndPheno =
+      finalGenoAndPhenoLines.length === 2 && GENOTYPE_LINE_PATTERN.test(finalGenoAndPhenoLines[0]);
+    if (this.usePotaMarkings && !hasValidFinalGenoAndPheno) {
+      this.result +=
+        '<br>FINAL GENO AND PHENO must contain a valid genotype and phenotype on two lines.<br>Remember to use the Official POTA Calculator.';
+      error = true;
+    }
+    const finalGenotype = hasValidFinalGenoAndPheno
+      ? finalGenoAndPhenoLines[0].replace(/^Genotype\s*:\s*/i, '')
+      : undefined;
+    const finalPhenotype = hasValidFinalGenoAndPheno
+      ? finalGenoAndPhenoLines[1].replace(/^Phenotype\s*:\s*/i, '').trim()
+      : undefined;
+    const missingRequiredFields: string[] = [];
+    if (!this.geno.trim()) missingRequiredFields.push('Geno');
+    if (!this.litter.trim()) missingRequiredFields.push('Litter or lineage information ');
+    if (!this.proofOfOwnership.trim()) missingRequiredFields.push('Proof of Ownership');
+    if (!this.ownerOrTribe.trim()) {
+      missingRequiredFields.push(this.tribeOwned ? 'Tribe' : 'Owner - Tokotna Username');
+    }
+    if (!this.designer.trim()) missingRequiredFields.push('Designer');
+    if (missingRequiredFields.length > 0) {
+      this.result += `Please fill all the required values before generating:<ul>${missingRequiredFields.map((field) => `<li>${field}</li>`).join('')}</ul>`;
       error = true;
     }
     if (!this.tribeOwned && this.ownerHasSpaces) {
@@ -513,9 +596,24 @@ export class App {
       this.soulPool &&
       selectedDecor.length === 0 &&
       selectedAddedTraits.length === 0 &&
-      !this.addingTraits
+      !this.addingTraits &&
+      !this.usePotaRevive &&
+      !this.usePotaMarkings &&
+      !this.genderChangeMethod &&
+      !this.useHpTokens
     ) {
-      this.result += '<br>Select at least one decor item for Soul Pool.';
+      this.result +=
+        '<br>Select at least one item for Soul Pool. If you are not using any, uncheck the checkbox.';
+      error = true;
+    }
+    if (
+      this.soulPool &&
+      this.usePotaMarkings &&
+      (!Number.isInteger(this.potaTokenQuantity) ||
+        this.potaTokenQuantity === null ||
+        this.potaTokenQuantity < 1)
+    ) {
+      this.result += '<br>Enter a whole quantity of at least 1 for PotA Tokens.';
       error = true;
     }
     if (
@@ -548,18 +646,14 @@ export class App {
       (option) => option.selected && detectedBases.has(option.base),
     );
     if (this.specialBaseCoat && selectedBaseCoats.length === 0) {
-      this.result += '<br>Select at least one special base coat from the detected bases.';
+      this.result +=
+        '<br>Select at least one special base coat from the detected bases, or uncheck special bases.';
       error = true;
     }
     if (this.specialBaseCoat && selectedBaseCoats.length > baseCoatSelection.maxSelections) {
       this.result += `<br>Select no more than ${baseCoatSelection.maxSelections} base coat${baseCoatSelection.maxSelections === 1 ? '' : 's'} for this Geno.`;
       error = true;
     }
-    if (error) {
-      this.formResult = this.result;
-      return;
-    }
-
     const genoLines = this.geno.split(/\r?\n/).map((line) => line.trim());
     const fieldLabelPattern =
       /^(?:Build|Breed|Gender|Mane(?: Type)?|Genotype|Phenotype|Hierarchy(?: Status)?|Health Status|Physical Traits|Non-Physical Traits|Hereditary Traits|Traits|Base Coats?|Lineage|Sire|Dam)\s*:?\s*$/i;
@@ -607,6 +701,18 @@ export class App {
     const identity = identityLine?.match(
       /^(?:\d+\)\s*)?(Male|Female)\s*(?:-|,)\s*(.+?)\s*Mane\b(?:\s*\(([^)]+?)\s+Variant\))?/i,
     );
+    const originalGender = getValue(this.geno, 'Gender') ?? identity?.[1];
+    let gender = originalGender;
+    if (this.genderChangeMethod) {
+      if (/^female$/i.test(originalGender?.trim() ?? '')) {
+        gender = 'Male';
+      } else if (/^male$/i.test(originalGender?.trim() ?? '')) {
+        gender = 'Female';
+      } else {
+        this.result += '<br>Gender must be Male or Female to change it.';
+        error = true;
+      }
+    }
     const rawManeType =
       getValue(this.geno, 'Mane Type') ??
       getValue(this.geno, 'Mane') ??
@@ -634,10 +740,12 @@ export class App {
     );
     const breed = buildType?.breed ?? getValue(this.geno, 'Breed');
     const genotypeIndex = genoLines.findIndex((line) => GENOTYPE_LINE_PATTERN.test(line));
-    const genotype =
+    const originalGenotype =
       getValue(this.geno, 'Genotype') ??
       (genotypeIndex >= 0 ? genoLines[genotypeIndex].replace(/^Genotype\s*:\s*/i, '') : undefined);
-    const phenotype = getValue(this.geno, 'Phenotype') ?? this.extractPhenotype();
+    const genotype = finalGenotype ?? originalGenotype;
+    const originalPhenotype = getValue(this.geno, 'Phenotype') ?? this.extractPhenotype();
+    const phenotype = finalPhenotype ?? originalPhenotype;
     const mutationRules: Array<[string, RegExp]> = [
       ['Albino', /\balbino\b/i],
       ['Bloodmarked', /\bbloodmark(?:ed)?\b/i],
@@ -752,9 +860,78 @@ export class App {
     const baseCoats = this.specialBaseCoat
       ? selectedBaseCoats.map((option) => `Base Coat - ${option.name}`)
       : ['Base Coat - Guide Swatch'];
-    const health = status?.[3]
-      ? `${status[2]} - ${status[3]}`
-      : (status?.[2] ?? getValue(this.geno, 'Health Status'));
+    const healthFromStatus = status?.[3] ? `${status[2]} - ${status[3]}` : status?.[2];
+    const healthFromField = getValue(this.geno, 'Health Status');
+    const rawHealth =
+      healthFromField?.includes('-') || !status?.[3]
+        ? (healthFromField ?? healthFromStatus)
+        : healthFromStatus;
+    const hasDeceasedMarker =
+      this.hasDeceasedMarker && Boolean(rawHealth && /\bDECEASED\b/i.test(rawHealth));
+    if (this.usePotaRevive && !hasDeceasedMarker) {
+      this.result +=
+        '<br>To use a PotA Token to revive, the Geno must include DECEASED in its Health Status.';
+      error = true;
+    }
+    const healthForNormalization =
+      this.usePotaRevive && rawHealth
+        ? (() => {
+            const match = rawHealth.trim().match(/^(Healthy|Inbred)(?:\s*-\s*(.+))?$/i);
+            if (!match || match[2] === undefined) return rawHealth;
+
+            const remainingDefects = match[2]
+              .split(',')
+              .map((defect) => defect.trim())
+              .filter((defect) => !/^DECEASED$/i.test(defect));
+            return `${match[1]}${remainingDefects.length ? ` - ${remainingDefects.join(', ')}` : ''}`;
+          })()
+        : rawHealth;
+    const normalizeHealth = (value: string): string | undefined => {
+      const match = value.trim().match(/^(Healthy|Inbred)(?:\s*-\s*(.+))?$/i);
+      if (!match) return undefined;
+
+      const healthStatus = HEALTH_STATUSES.find(
+        (option) => option.toLowerCase() === match[1].toLowerCase(),
+      );
+      if (!healthStatus) return undefined;
+      if (match[2] === undefined) return healthStatus;
+
+      const defectNames = match[2].split(',').map((defect) => defect.trim());
+      if (defectNames.some((defect) => !defect)) return undefined;
+
+      const normalizedDefects: string[] = [];
+      for (const defectName of defectNames) {
+        const defect = HEALTH_DEFECTS.find(
+          (option) => option.toLowerCase() === defectName.toLowerCase(),
+        );
+        if (!defect || normalizedDefects.includes(defect)) return undefined;
+        normalizedDefects.push(defect);
+      }
+
+      return `${healthStatus} - ${normalizedDefects.join(', ')}`;
+    };
+    const health =
+      healthForNormalization?.trim() && !/^unknown$/i.test(healthForNormalization.trim())
+        ? normalizeHealth(healthForNormalization)
+        : undefined;
+    if (
+      healthForNormalization?.trim() &&
+      !/^unknown$/i.test(healthForNormalization.trim()) &&
+      !health
+    ) {
+      this.result += `<br>Health Status must be Healthy or Inbred, optionally followed by a comma-separated list of: ${HEALTH_DEFECTS.join(', ')}.`;
+      error = true;
+    }
+    if (error) {
+      this.formResult = this.result;
+      return;
+    }
+    const healthPlaceholder = `(${HEALTH_STATUSES.join('/')}) - (${HEALTH_DEFECTS.join(', ')})`;
+    const hierarchyStatus = this.useHpTokens
+      ? 'Average'
+      : (getValue(this.geno, 'Hierarchy Status') ??
+        getValue(this.geno, 'Hierarchy') ??
+        status?.[1]);
     const redPlaceholder = (value: string): string =>
       `<span class="text-danger">${escapeHtml(value)}</span>`;
     const renderValue = (value: string | undefined, placeholder: string): string =>
@@ -791,12 +968,12 @@ export class App {
       this.tribeOwned ? `**Tribe:** ${ownerOrTribe}` : `**Owner:** ${ownerOrTribe}`,
       '**Species:** [Tokotas](https://www.deviantart.com/tokotas)',
       `**Breed:** ${renderValue(breed, 'add information here')}`,
-      `**Gender:** ${renderValue(getValue(this.geno, 'Gender') ?? identity?.[1], '(Male/Female)')}`,
+      `**Gender:** ${renderValue(gender, '(Male/Female)')}`,
       `**Mane Type:** ${renderValue(maneType, maneTypePlaceholder)}`,
       `**Genotype:** ${renderValue(genotype, 'add information here')}`,
       `**Phenotype:** ${renderValue(phenotype, 'add information here')}`,
-      `**Hierarchy Status:** ${renderValue(getValue(this.geno, 'Hierarchy Status') ?? getValue(this.geno, 'Hierarchy') ?? status?.[1], '(Submissive/Average)')}`,
-      `**Health Status:** ${renderValue(health, '(Healthy/Inbred) - (Infertile, Sterile, Spinal Defects, Blind, Deaf, Frail, Lame)')}`,
+      `**Hierarchy Status:** ${renderValue(hierarchyStatus, '(Submissive/Average)')}`,
+      `**Health Status:** ${renderValue(health, healthPlaceholder)}`,
       '**Mutations:**',
       ...mutations,
       '',
@@ -843,15 +1020,37 @@ export class App {
         : []),
     ].join('\n');
 
+    const normalizedGeno = this.geno
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join('\n');
+
+    if (this.formType === 'Soul Pool Form') {
+      const potaTokenQuantity =
+        (this.usePotaRevive ? 1 : 0) +
+        (this.usePotaMarkings ? (this.potaTokenQuantity ?? 0) : 0) +
+        (this.genderChangeMethod === 'potaToken' ? 1 : 0);
+      const massRemoveItems = [
+        ...(potaTokenQuantity > 0 ? [`PotA Token x ${potaTokenQuantity}`] : []),
+        ...(this.genderChangeMethod === 'metamorphosisMixture'
+          ? ['Metamorphosis Mixture x 1']
+          : []),
+        ...(selectedAddedTraits.length > 0 ? [`SPW x ${selectedAddedTraits.length}`] : []),
+        ...(this.useHpTokens ? ['HP Tokens x 35'] : []),
+        ...selectedDecor.map((option) => `${option.name} x ${option.quantity}`),
+      ];
+      this.massRemoveResult = massRemoveItems.join(', ');
+    }
     const formTemplate = [
       this.tribeOwned
-        ? '**Bonuses & Monthly Limits**: (Provide link to your Tokotna Bonuses & Monthly Limits Page)'
+        ? '**Bonuses & Monthly Limits**: <span class="text-danger">(Provide link to your Tokotna Bonuses & Monthly Limits Page)</span>'
         : `**Bonuses & Monthly Limits**: [${escapeHtml(this.ownerOrTribe.trim())}'s Bonuses & Monthly Limits](https://tokotna.com/profile/limits/index.php?user=${encodeURIComponent(this.ownerOrTribe.trim())})`,
       ...(this.formType === 'Soul Pool Form'
         ? ['**-- Using Dire Dunks Macchiato**: <span class="text-danger">Yes/No</span>']
         : []),
       '**Full Geno**:',
-      escapeHtml(this.geno.trim()),
+      escapeHtml(normalizedGeno),
       `**Proof of Ownership**: ${formatProofOfOwnership(this.proofOfOwnership)}`,
       ...(this.formType === 'Design Den Form'
         ? [
@@ -865,12 +1064,23 @@ export class App {
       ...(this.formType === 'Soul Pool Form'
         ? [
             '**Items Using**:',
-            '**-- Special**: <span class="text-danger">(PotA Token / SPW / HP Tokens, etc.)</span>',
+            '**-- Special**: ',
+            ...(this.usePotaRevive ? ['x1 PotA Token (Revive)'] : []),
+            ...(this.usePotaMarkings
+              ? [
+                  `x${this.potaTokenQuantity} PotA Token <span class="text-danger">(List all the added and/or removed markings)</span>`,
+                ]
+              : []),
+            ...(this.genderChangeMethod === 'potaToken' ? ['x1 PotA Token (Gender Change)'] : []),
+            ...(this.genderChangeMethod === 'metamorphosisMixture'
+              ? ['x1 Metamorphosis Mixture (Gender Change)']
+              : []),
             ...(selectedAddedTraits.length > 0
               ? [
                   `x${selectedAddedTraits.length} SPW (${selectedAddedTraits.map((trait) => escapeHtml(trait.name)).join(', ')})`,
                 ]
               : []),
+            ...(this.useHpTokens ? ['x35 HP Tokens'] : []),
             '**-- Decor**:',
             ...selectedDecor.map(
               (option) =>
@@ -879,10 +1089,18 @@ export class App {
             '',
             '**Remove/Buy for You?**:  <span class="text-danger">Yes/No</span> ([See description](https://tokotna.com/tokopedia/index.php?name=Design+Central+Rules#spbuy))',
             '',
-            '<span class="text-danger">PotAing Double Merle? [Add these lines to your form](https://tokotna.com/tokopedia/index.php?name=Design+Central+Rules#mrlmrl)</span>',
+            ...(this.usePotaRevive || this.usePotaMarkings
+              ? [
+                  '<span class="text-danger">PotAing Double Merle? [Add these lines to your form](https://tokotna.com/tokopedia/index.php?name=Design+Central+Rules#mrlmrl)</span>',
+                ]
+              : []),
+            [],
+            ['**Admin Mass Remove**:'],
+            [this.massRemoveResult],
           ]
         : []),
     ].join('\n');
+
     const renderText = (text: string): string =>
       text
         .replace(
