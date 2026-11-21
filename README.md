@@ -15,6 +15,10 @@ npm start
 
 Open [http://localhost:4200](http://localhost:4200). The development server reloads when source files change.
 
+## Deploy to Netlify
+
+The repository's `netlify.toml` configures Netlify to run `npm run build` and publish `dist/tokoDCFormGenerator/browser`. Keep the publish directory aligned with Angular's browser output if the build configuration changes.
+
 ## Use the generator
 
 1. Paste the Geno into **Geno**. For an on-site Geno, paste from **Build** through **Lineage**.
