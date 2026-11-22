@@ -2,9 +2,6 @@
   <div class="card shadow-sm">
     <div class="card-body p-3 p-md-4">
       <h1 class="h2 fw-bold text-center mb-3">{{ title }}</h1>
-      <p class="text-body-secondary text-center mb-4">
-        Complete the breeding request details, then generate the form to copy.
-      </p>
 
 
       <fieldset class="border rounded p-3 mb-4">
@@ -49,14 +46,19 @@
           >
             <legend class="float-none w-auto px-2 fs-6 fw-semibold">
               Sire build
-              <span class="badge ms-1" [class.text-bg-danger]="!sireBuild">REQUIRED</span>
+              <span
+                class="badge ms-1"
+                [class.text-bg-danger]="!sireBuild"
+                [class.text-bg-success]="!!sireBuild"
+                >REQUIRED</span
+              >
             </legend>
             <div class="row row-cols-1 row-cols-sm-2 g-2">
               @for (build of builds; track build) {
                 <div class="col">
                   <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
                     <input
-                      class="form-check-input m-0"
+                      class="form-check-input m-0"Ff
                       type="radio"
                       name="sireBuild"
                       [value]="build"
@@ -84,7 +86,12 @@
           >
             <legend class="float-none w-auto px-2 fs-6 fw-semibold">
               Dam build
-              <span class="badge ms-1" [class.text-bg-danger]="!damBuild">REQUIRED</span>
+              <span
+                class="badge ms-1"
+                [class.text-bg-danger]="!damBuild"
+                [class.text-bg-success]="!!damBuild"
+                >REQUIRED</span
+              >
             </legend>
             <div class="row row-cols-1 row-cols-sm-2 g-2">
               @for (build of builds; track build) {
@@ -122,7 +129,12 @@
         <div class="col-12 col-md-6">
           <label for="username" class="form-label fw-semibold">
             Tokotna username
-            <span class="badge ms-1" [class.text-bg-danger]="!username.trim()">REQUIRED</span>
+            <span
+              class="badge ms-1"
+              [class.text-bg-danger]="!username.trim()"
+              [class.text-bg-success]="username.trim().length > 0"
+              >REQUIRED</span
+            >
           </label>
           <input
             id="username"
@@ -176,12 +188,16 @@
       @if (litterMode === 'split') {
         <section class="card bg-light mb-4" aria-label="Split litter details">
           <div class="card-body">
-            <h2 class="h6 mb-3">Split litter details</h2>
+            <h2 class="h5 fw-bold mb-3">Split litter details</h2>
             <div class="row g-3">
               <div class="col-12 col-md-6">
                 <label for="splitPartner" class="form-label fw-semibold">
                   Split partner username
-                  <span class="badge ms-1" [class.text-bg-danger]="!splitPartner.trim()">
+                  <span
+                    class="badge ms-1"
+                    [class.text-bg-danger]="!splitPartner.trim()"
+                    [class.text-bg-success]="splitPartner.trim().length > 0"
+                  >
                     REQUIRED
                   </span>
                 </label>
@@ -196,9 +212,14 @@
                 />
               </div>
               <fieldset class="col-12 col-md-6">
-                <legend class="form-label fw-semibold">
+                <legend class="form-label fw-semibold fs-6">
                   POTL goes to
-                  <span class="badge ms-1" [class.text-bg-danger]="!potlTo">REQUIRED</span>
+                  <span
+                    class="badge ms-1"
+                    [class.text-bg-danger]="!potlTo"
+                    [class.text-bg-success]="!!potlTo"
+                    >REQUIRED</span
+                  >
                 </legend>
                 <div class="btn-group w-100" role="group" aria-label="POTL goes to">
                   <input
@@ -232,7 +253,7 @@
 
       <section class="card bg-light mb-4" aria-label="Breeding options">
         <div class="card-body">
-          <h2 class="h5 mb-3">Breeding options</h2>
+          <h2 class="h5 fw-bold mb-3">Breeding options</h2>
           <div class="form-check mb-2">
             <input
               id="inbreeding"
@@ -320,7 +341,12 @@
               @if (usingRoot) {
                 <label for="rootType" class="form-label fw-semibold">
                   Root item
-                  <span class="badge ms-1" [class.text-bg-danger]="!rootType">REQUIRED</span>
+                  <span
+                    class="badge ms-1"
+                    [class.text-bg-danger]="!rootType"
+                    [class.text-bg-success]="!!rootType"
+                    >REQUIRED</span
+                  >
                 </label>
                 <select
                   id="rootType"
@@ -357,13 +383,19 @@
           @if (useExtraSpot) {
             <label for="extraSpot" class="form-label fw-semibold">
               Extra spot item
-              <span class="badge ms-1" [class.text-bg-danger]="!extraSpot">REQUIRED</span>
+              <span
+                class="badge ms-1"
+                [class.text-bg-danger]="!extraSlot"
+                [class.text-bg-success]="!!extraSlot"
+                >REQUIRED</span
+              >
             </label>
             <select
               id="extraSpot"
               class="form-select"
-              [class.is-invalid]="!extraSpot"
-              [(ngModel)]="extraSpot"
+              [class.is-invalid]="!extraSlot"
+              [ngModel]="extraSlot"
+              (ngModelChange)="setExtraSpot($event)"
               name="extraSpot"
             >
               <option value="">Choose an extra spot item</option>
@@ -371,16 +403,49 @@
                 <option [value]="item">{{ item }}</option>
               }
             </select>
+            @if (extraSlot === talismanExtraSpot) {
+              <fieldset class="border rounded p-3 mt-3">
+                <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+                  Choose one
+                  <span
+                    class="badge ms-1"
+                    [class.text-bg-danger]="!extraSlot"
+                    [class.text-bg-success]="!!extraSlot"
+                  >
+                    REQUIRED
+                  </span>
+                </legend>
+                <div class="btn-group w-100" role="group" aria-label="Talisman extra spot option">
+                  @for (choice of talismanExtraSpotChoices; track choice; let index = $index) {
+                    <input
+                      [id]="'extra-spot-choice-' + index"
+                      class="btn-check"
+                      type="radio"
+                      name="extraSpotChoice"
+                      [value]="choice"
+                      autocomplete="off"
+                      [(ngModel)]="extraSlotChoice"
+                    />
+                    <label
+                      class="btn btn-outline-primary flex-fill"
+                      [for]="'extra-spot-choice-' + index"
+                    >
+                      {{ choice }}
+                    </label>
+                  }
+                </div>
+              </fieldset>
+            }
           }
         </div>
       </section>
 
       <section class="card bg-light mb-4" aria-label="Build supplements">
         <div class="card-body">
-          <h2 class="h5 mb-3">Build supplements</h2>
+          <h2 class="h5 fw-bold mb-3">Build supplements</h2>
           @if (boosterItems.length > 0) {
             <div class="row row-cols-1 row-cols-md-2 g-2">
-              @for (item of boosterItems; track item) {
+              @for (item of boosterItems.sort(); track item) {
                 <div class="col">
                   <label
                     class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
@@ -405,7 +470,7 @@
 
       <section class="card bg-light mb-4" aria-label="Other items">
         <div class="card-body">
-          <h2 class="h5 mb-3">Other items</h2>
+          <h2 class="h5 fw-bold mb-3">Other items</h2>
           @for (group of otherGroups; track group.title) {
             <fieldset class="border rounded bg-white p-3 mb-3">
               <legend class="float-none w-auto px-2 fs-6 fw-semibold">{{ group.title }}</legend>
@@ -433,7 +498,7 @@
 
       <section class="card bg-light mb-4" aria-label="Trait items">
         <div class="card-body">
-          <h2 class="h5 mb-2">Trait items</h2>
+          <h2 class="h5 fw-bold mb-2">Using Traits on the Breeding</h2>
           <p class="form-text">For each selected item, describe its effect and bag size if needed.</p>
           <div class="row row-cols-1 row-cols-lg-2 g-3">
             @for (item of traitItems; track item.name) {
@@ -453,9 +518,60 @@
                     </label>
                   </div>
                   @if (item.checked) {
+                    @if (item.name !== 'Blessed Union') {
+                      <fieldset class="mb-2">
+                        <legend class="form-label fs-6 fw-semibold">
+                          Effect direction
+                          <span
+                            class="badge ms-1"
+                            [class.text-bg-danger]="item.increase === null"
+                            [class.text-bg-success]="item.increase !== null"
+                            >REQUIRED</span
+                          >
+                        </legend>
+                        <div
+                          class="btn-group w-100"
+                          role="group"
+                          [attr.aria-label]="'Effect direction for ' + item.name"
+                        >
+                          <input
+                            [id]="'trait-increase-' + $index"
+                            class="btn-check"
+                            type="radio"
+                            [name]="'trait-direction-' + $index"
+                            [value]="true"
+                            autocomplete="off"
+                            [(ngModel)]="item.increase"
+                          />
+                          <label
+                            class="btn btn-outline-primary flex-fill"
+                            [for]="'trait-increase-' + $index"
+                            >Increase</label
+                          >
+                          <input
+                            [id]="'trait-decrease-' + $index"
+                            class="btn-check"
+                            type="radio"
+                            [name]="'trait-direction-' + $index"
+                            [value]="false"
+                            autocomplete="off"
+                            [(ngModel)]="item.increase"
+                          />
+                          <label
+                            class="btn btn-outline-primary flex-fill"
+                            [for]="'trait-decrease-' + $index"
+                            >Decrease</label
+                          >
+                        </div>
+                      </fieldset>
+                    }
                     <label [for]="'trait-target-' + $index" class="form-label">
                       What does it affect?
-                      <span class="badge ms-1" [class.text-bg-danger]="!item.target.trim()">
+                      <span
+                        class="badge ms-1"
+                        [class.text-bg-danger]="!item.target.trim()"
+                        [class.text-bg-success]="item.target.trim().length > 0"
+                      >
                         REQUIRED
                       </span>
                     </label>
@@ -471,7 +587,12 @@
                     @if (item.hasBag) {
                       <label [for]="'trait-bag-' + $index" class="form-label">
                         Sacrificial bag size
-                        <span class="badge ms-1" [class.text-bg-danger]="!item.bag">REQUIRED</span>
+                        <span
+                          class="badge ms-1"
+                          [class.text-bg-danger]="!item.bag"
+                          [class.text-bg-success]="!!item.bag"
+                          >REQUIRED</span
+                        >
                       </label>
                       <select
                         [id]="'trait-bag-' + $index"
@@ -512,6 +633,7 @@
                 <span
                   class="badge ms-1"
                   [class.text-bg-danger]="!stylistToken.target.trim()"
+                  [class.text-bg-success]="stylistToken.target.trim().length > 0"
                   >REQUIRED</span
                 >
               </label>
@@ -528,13 +650,91 @@
           }
         </div>
       </section>
+       <section class="card bg-light mb-4" aria-label="Meel Sprite">
+        <div class="card-body">
+          <div class="form-check">
+            <input
+              id="meelSprite"
+              class="form-check-input"
+              type="checkbox"
+              [(ngModel)]="meelSprite.checked"
+              name="meelSprite"
+            />
+            <label class="form-check-label fw-semibold" for="meelSprite">Meel Sprite</label>
+          </div>
+          @if (meelSprite.checked) {
+            <div class="mt-2">
+              <label for="meelSpriteTarget" class="form-label">
+                What does it affect?
+                <span
+                  class="badge ms-1"
+                  [class.text-bg-danger]="!meelSprite.target.trim()"
+                  [class.text-bg-success]="meelSprite.target.trim().length > 0"
+                  >REQUIRED</span
+                >
+              </label>
+              <input
+                id="meelSpriteTarget"
+                class="form-control"
+                type="text"
+                [class.is-invalid]="!meelSprite.target.trim()"
+                [(ngModel)]="meelSprite.target"
+                name="meelSpriteTarget"
+                placeholder="Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait"
+              />
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="card bg-light mb-4" aria-label="Soul Pool Pebble">
+        <div class="card-body">
+          <div class="form-check">
+            <input
+              id="soulPoolPebble"
+              class="form-check-input"
+              type="checkbox"
+              [(ngModel)]="soulPoolPebble.checked"
+              name="soulPoolPebble"
+            />
+            <label class="form-check-label fw-semibold" for="soulPoolPebble">
+              Soul Pool Pebble
+            </label>
+          </div>
+          @if (soulPoolPebble.checked) {
+            <div class="mt-2">
+              <label for="soulPoolPebbleTarget" class="form-label fw-semibold">
+                Mane
+                <span
+                  class="badge ms-1"
+                  [class.text-bg-danger]="!soulPoolPebble.target"
+                  [class.text-bg-success]="!!soulPoolPebble.target"
+                  >REQUIRED</span
+                ><br><small>Make sure you check the available Manes to Pebble for your pairing from the Breeding Roller or Mane Calculator!</small>
+              </label>
+              <select
+                id="soulPoolPebbleTarget"
+                class="form-select"
+                [class.is-invalid]="!soulPoolPebble.target"
+                [(ngModel)]="soulPoolPebble.target"
+                name="soulPoolPebbleTarget"
+              >
+                <option value="">Choose a Mane</option>
+                @for (mane of maneTypes; track mane) {
+                  <option [value]="mane">{{ mane }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+      </section>
 
       <div class="d-grid mb-3">
         <button type="button" class="btn btn-primary" (click)="generate()">Generate form</button>
       </div>
 
       <section class="mb-3" aria-labelledby="breeding-result-label">
-        <h2 id="breeding-result-label" class="h5 fw-bold">{{ title }} - Copy Paste</h2>
+        <h2 id="breeding-result-label" class="h5 fw-bold">{{ title }} - Copy Paste (Check it for possible Errors)</h2>
         <em>All the text in red should be filled manually!</em>
         <div
           class="border rounded bg-light p-3 text-break user-select-all"
@@ -542,6 +742,18 @@
           aria-labelledby="breeding-result-label"
           tabindex="0"
           [innerHTML]="result"
+        ></div>
+      </section>
+
+      <section class="mb-3" aria-labelledby="breeding-result-label">
+        <h2 id="breeding-result-label" class="h5 fw-bold">Mass Remove Log</h2>
+        <em>Do not include this on your form, its just a test</em>
+        <div
+          class="border rounded bg-light p-3 text-break user-select-all"
+          role="region"
+          aria-labelledby="breeding-result-label"
+          tabindex="0"
+          [innerHTML]="massRemove"
         ></div>
       </section>
 

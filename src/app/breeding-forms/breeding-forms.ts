@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MANE_TYPES, RAW_MANE_TYPES } from '../shared/mane-types';
 
 type FormType = 'Main' | 'Starter';
 type LitterMode = 'full' | 'split';
@@ -10,6 +11,7 @@ type TraitItem = {
   checked: boolean;
   hasBag: boolean;
   bag: '' | 'Small' | 'Large';
+  increase: boolean | null;
   target: string;
   placeholder: string;
 };
@@ -17,15 +19,15 @@ type TraitItem = {
 const FACTIONS = ['PL', 'PB', 'LK', 'KS', 'WT', 'TB', 'Neutral'];
 const BUILDS = [
   'Tokota',
+  'Toki',
   'Tokhara',
   'Sinaka',
-  'Odonyx',
-  'Akota',
-  'Dakino',
   'Miralta',
-  'Makhata',
-  'Toki',
   'Dire',
+  'Akota',
+  'Odonyx',
+  'Dakino',
+  'Makhata',
 ] as const;
 type Build = (typeof BUILDS)[number];
 const COMPATIBLE: Record<Build, Build[]> = {
@@ -43,6 +45,16 @@ const COMPATIBLE: Record<Build, Build[]> = {
 
 const SUPP_RULES: SuppRule[] = [
   {
+    builds: ['Dakino', 'Odonyx'],
+    items: [
+      'Breeder Box',
+      'Homemade Breeders Box',
+      "Bede's Blessing",
+      'Capybara Totem',
+      'Capybara',
+    ],
+  },
+  {
     builds: ['Akota', 'Makhata'],
     items: [
       'Chonk Chews',
@@ -56,16 +68,7 @@ const SUPP_RULES: SuppRule[] = [
     builds: ['Dire', 'Miralta'],
     items: ['Close Care', 'Homemade Close Care', "Amber's Blessing", 'Moose Totem', 'Kinkajou'],
   },
-  {
-    builds: ['Dakino', 'Odonyx'],
-    items: [
-      'Breeder Box',
-      'Homemade Breeders Box',
-      "Bede's Blessing",
-      'Capybara Totem',
-      'Capybara',
-    ],
-  },
+
   {
     builds: ['Tokhara', 'Sinaka'],
     items: [
@@ -103,12 +106,19 @@ const BOOSTERS: Record<Build, string> = {
   Sinaka: 'Foxy Brew',
 };
 
-const EXTRA_SPOT_OPTIONS: Record<FormType, string[]> = {
-  Main: ['Talisman', 'Passionate I', 'Passionate II', 'Starbarks'],
+const TALISMAN_EXTRA_SLOT = 'Talisman / Breeding Image / Shikoku + Shiba / Woodpecker Totem';
+const TALISMAN_EXTRA_SLOT_CHOICES = ['Inukshuk Talisman', 'Breeding Image', 'Shikoku + Shiba', 'Woodpecker Totem'] as const;
+
+const EXTRA_SLOT_OPTIONS: Record<FormType, string[]> = {
+  Main: [TALISMAN_EXTRA_SLOT, 'Passionate I', 'Passionate II', 'Starbarks'],
   Starter: ['Ardent', 'Shikoku', 'Nestoko Tea'],
 };
 
 const OTHER_GROUPS: { title: string; items: string[] }[] = [
+  {
+    title: 'Litter Gender Potions',
+    items: ['Masculine Potion', 'Femenine Potion'],
+  },
   {
     title: 'Marking Reducers',
     items: [
@@ -150,7 +160,7 @@ const OTHER_GROUPS: { title: string; items: string[] }[] = [
       'Aurora in a Bottle',
     ],
   },
-  { title: 'Other', items: ['Chocolates', 'Lavender'] },
+  { title: 'Other', items: ['Box of Chocolates', 'Lavender'] },
 ];
 
 const escapeHtml = (value: string): string =>
@@ -175,28 +185,40 @@ function toggleIn(list: string[], name: string, checked: boolean): string[] {
 function createTraitItems(): TraitItem[] {
   return [
     {
+      name: 'Blessed Union',
+      checked: false,
+      hasBag: false,
+      bag: '',
+      increase: null,
+      target: '',
+      placeholder: 'Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait',
+    },
+    {
       name: 'Offering to the Gods',
       checked: false,
       hasBag: true,
       bag: '',
+      increase: null,
       target: '',
-      placeholder: 'Include: Increase OR Decrease and which Gene',
+      placeholder: 'Which Gene does it affect?',
     },
     {
       name: 'Devotion to the Spirits',
       checked: false,
       hasBag: true,
       bag: '',
+      increase: null,
       target: '',
-      placeholder: 'Include: Which Mane Variant are you Increasing',
+      placeholder: 'Which Mane Variant does it affect?',
     },
     {
       name: 'Tribute to the Fates',
       checked: false,
       hasBag: true,
       bag: '',
+      increase: null,
       target: '',
-      placeholder: 'Include: Increase OR Decrease and which Mutation',
+      placeholder: 'Which Mutation does it affect?',
     },
   ];
 }
@@ -227,13 +249,20 @@ export class BreedingForms {
   useExtraSpot = false;
   protected litterSupps = '';
   protected rootType = '';
-  protected extraSpot = '';
+  protected extraSlot = '';
+  protected extraSlotChoice = '';
+  protected readonly talismanExtraSpot = TALISMAN_EXTRA_SLOT;
+  protected readonly talismanExtraSpotChoices = TALISMAN_EXTRA_SLOT_CHOICES;
   usingRoot = false;
   protected selectedBoosters: string[] = [];
   protected selectedOther: string[] = [];
   protected traitItems: TraitItem[] = createTraitItems();
   protected stylistToken = { checked: false, target: '' };
+  protected soulPoolPebble = { checked: false, target: '' };
+  protected maneTypes = RAW_MANE_TYPES;
+  protected meelSprite = { checked: false, target: '' };
   protected result = '';
+  protected massRemove = '';
 
   protected get rootOptions(): string[] {
     return [...ROOT_TYPES, AGA_SPRITE];
@@ -262,7 +291,7 @@ export class BreedingForms {
   }
 
   protected get extraSpotOptions(): string[] {
-    return EXTRA_SPOT_OPTIONS[this.formType];
+    return EXTRA_SLOT_OPTIONS[this.formType];
   }
 
   canPair(a: Build | '', b: Build | ''): boolean {
@@ -277,6 +306,11 @@ export class BreedingForms {
   setDam(d: Build | '') {
     this.damBuild = d;
     this.cleanSelections();
+  }
+
+  setExtraSpot(value: string): void {
+    this.extraSlot = value;
+    this.extraSlotChoice = '';
   }
 
   resetBuilds(): void {
@@ -295,10 +329,12 @@ export class BreedingForms {
     if (value === 'Main') {
       this.usingRoot = false;
       this.rootType = '';
-      this.extraSpot = '';
+      this.extraSlot = '';
+      this.extraSlotChoice = '';
     } else {
       this.litterSupps = '';
-      this.extraSpot = '';
+      this.extraSlot = '';
+      this.extraSlotChoice = '';
     }
 
     this.formType = value;
@@ -328,6 +364,7 @@ export class BreedingForms {
     item.checked = checked;
     if (!checked) {
       item.bag = '';
+      item.increase = null;
       item.target = '';
     }
   }
@@ -347,13 +384,16 @@ export class BreedingForms {
     this.useExtraSpot = false;
     this.litterSupps = '';
     this.rootType = '';
-    this.extraSpot = '';
+    this.extraSlot = '';
+    this.extraSlotChoice = '';
     this.usingRoot = false;
     this.selectedBoosters = [];
     this.selectedOther = [];
     this.traitItems = createTraitItems();
     this.stylistToken = { checked: false, target: '' };
+    this.soulPoolPebble = { checked: false, target: '' };
     this.result = '';
+    this.massRemove = '';
   }
 
   generate() {
@@ -371,14 +411,17 @@ export class BreedingForms {
       if (!this.potlTo) errors.push('Choose who receives the POTL.');
     }
 
-    if (this.useExtraSpot && !this.extraSpot) {
+    if (this.useExtraSpot && !this.extraSlot) {
       errors.push('Select an extra breeding spot.');
+    }
+    if (this.useExtraSpot && this.extraSlot === TALISMAN_EXTRA_SLOT && !this.extraSlotChoice) {
+      errors.push('Choose an option for the Talisman extra spot.');
     }
 
     if (this.formType === 'Starter' && this.usingRoot && !this.rootType) {
       errors.push('Select a fertility root.');
     }
-
+    var blessedUnioninBreeding = false;
     this.traitItems
       .filter((item) => item.checked)
       .forEach((item) => {
@@ -386,11 +429,49 @@ export class BreedingForms {
         if (item.hasBag && !item.bag) {
           errors.push(`Select a sacrificial bag size for ${item.name}.`);
         }
+        if (item.name !== 'Blessed Union' && item.increase === null) {
+          errors.push(`Choose Increase or Decrease for ${item.name}.`);
+        }
+        if (item.name === 'Blessed Union') {
+          blessedUnioninBreeding = true;
+        }
       });
     if (this.stylistToken.checked && !this.stylistToken.target.trim()) {
-      errors.push('Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait');
+      errors.push(
+        'For Stylist Token: Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait',
+      );
     }
 
+    if (this.meelSprite.checked && !this.meelSprite.target.trim()) {
+      errors.push(
+        'For Meelanik Sprite: Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait',
+      );
+    }
+    if (this.soulPoolPebble.checked && !this.soulPoolPebble.target) {
+      errors.push('Select a Mane for Soul Pool Pebble.');
+    }
+
+    if (
+      (this.stylistToken.checked && this.meelSprite.checked) ||
+      (this.stylistToken.checked && blessedUnioninBreeding) ||
+      (this.meelSprite.checked && blessedUnioninBreeding)
+    ) {
+      errors.push(
+        'Only one of this can be selected: [Stylist Token, Meelanik Sprite, Blessed Union]',
+      );
+    }
+    if (blessedUnioninBreeding) {
+      if (this.extraSlotChoice !== 'Breeding Image') {
+        errors.push('Blessed Union can only be used with a Breeding Image');
+      }
+    }
+
+    if (
+      this.selectedOther.includes('Femenine Potion') &&
+      this.selectedOther.includes('Masculine Potion')
+    ) {
+      errors.push('You can only select One Gender Potion.');
+    }
     if (errors.length > 0) {
       this.result = errors.join('<br>');
       return;
@@ -399,13 +480,13 @@ export class BreedingForms {
     let litterLine = 'Full to me';
     if (this.litterMode === 'split') {
       const potl = this.potlTo === 'me' ? 'me' : this.splitPartner;
-      litterLine = `Split with ${this.splitPartner} - POTL to ${potl}`;
+      litterLine = `Split with @${this.splitPartner} - POTL to ${potl}`;
     }
 
     let splitLimitsLine = '-';
     if (this.litterMode === 'split') {
       const partner = this.splitPartner.trim();
-      splitLimitsLine = `[${escapeHtml(partner)}'s Bonuses & Monthly Limits](https://tokotna.com/profile/limits/index.php?user=${encodeURIComponent(partner)})`;
+      splitLimitsLine = `[${escapeHtml(partner)}'s Tokotna Bonuses & Monthly Limits](https://tokotna.com/profile/limits/index.php?user=${encodeURIComponent(partner)})`;
     }
     let inbreedingLine = 'No';
     if (this.inbreeding) {
@@ -416,19 +497,38 @@ export class BreedingForms {
     }
     const rollIfInjuriesLine = this.rollInjuries ? 'Yes' : 'No';
     const usingTribeBonusLine = this.useTribeBonus ? 'Yes' : 'No';
-    const extraSlotLine = this.useExtraSpot ? `Yes - ${this.extraSpot}` : 'No';
+    const selectedExtraSpot =
+      this.extraSlot === TALISMAN_EXTRA_SLOT ? this.extraSlotChoice : this.extraSlot;
+    const extraSlotLine = this.useExtraSpot ? `Yes - ${selectedExtraSpot}` : 'No';
 
+    var largeBag = 0;
+    var smallBag = 0;
     const traitLines = this.traitItems
       .filter((i) => i.checked)
       .map((i) => {
         const target = escapeHtml(i.target.trim());
         const name = escapeHtml(i.name);
+        const direction = i.increase === null ? '' : `${i.increase ? 'Increase' : 'Decrease'} `;
+        if (i.hasBag) {
+          if (i.bag === 'Large') {
+            largeBag += 1;
+          } else {
+            smallBag += 1;
+          }
+        }
         return i.hasBag
-          ? `${i.bag} Sacrificial Bag (${name} - ${target})`
+          ? `${i.bag} Sacrificial Bag (${name} - ${direction}${target})`
           : `${name} (${target})`;
       });
     const stylistTokenLine = this.stylistToken.checked
       ? `Stylist Token (${escapeHtml(this.stylistToken.target.trim())})`
+      : undefined;
+
+    const meelSpriteLine = this.meelSprite.checked
+      ? `Meelanik Sprite (${escapeHtml(this.meelSprite.target.trim())})`
+      : undefined;
+    const soulPoolPebbleLine = this.soulPoolPebble.checked
+      ? `Soul Pool Pebble (${escapeHtml(this.soulPoolPebble.target)})`
       : undefined;
 
     const firstPart = [
@@ -450,22 +550,44 @@ export class BreedingForms {
       `**Roll if injuries present:** ${rollIfInjuriesLine}`,
       `**.**`,
       `**Supplementary Items:**`,
-      `**.**`,
     ];
+    const massResultSupp = [];
+
     let middlePart: string[] = [];
     if (this.formType === 'Main') {
-      middlePart = [`**- Litter Size Supps:**: ${this.litterSupps}`];
+      middlePart = [`**- Litter Size Supps:** ${this.litterSupps.trim() ? this.litterSupps : '-'}`];
+      if (
+        this.litterSupps.trim() !== '' &&
+        this.litterSupps != 'Aga Sprite' &&
+        !this.litterSupps.includes('Blessing') &&
+        !this.litterSupps.includes('Totem') &&
+        this.litterSupps != 'Panda' &&
+        this.litterSupps != 'Swan' &&
+        this.litterSupps != 'Koala' &&
+        this.litterSupps != 'Capybara' &&
+        this.litterSupps != 'Kinkajou'
+      ) {
+        massResultSupp.push(this.litterSupps);
+      }
     } else {
       middlePart = [`**- Fertility Root:** ${this.usingRoot ? `Yes - ${this.rootType}` : 'No'}`];
+      if (this.usingRoot) {
+        if (this.rootType === 'Fertility Root' || this.rootType === 'Homemade Fertility Root')
+          massResultSupp.push(this.rootType);
+      }
     }
     const otherLines = [
       ...this.selectedOther,
-      ...traitLines,
       ...(stylistTokenLine ? [stylistTokenLine] : []),
+      ...(meelSpriteLine ? [meelSpriteLine] : []),
+      ...(soulPoolPebbleLine ? [soulPoolPebbleLine] : []),
     ];
+    otherLines.sort();
+    otherLines.push(...traitLines);
+
     const lastPart = [
-      `**- Build Supps**: ${this.selectedBoosters.join(',')}`,
-      `**- Other:**: ${otherLines.length > 0 ? otherLines.join(', ') : '-'}`,
+      `**- Build Supps**: ${this.selectedBoosters.sort().join(', ') || '-'}`,
+      `**- Other:** ${otherLines.length > 0 ? otherLines.join(', ') : '-'}`,
       `**.**`,
       `**Using Tribe Rare Mane Bonus?**: ${usingTribeBonusLine}`,
       `**.**`,
@@ -485,6 +607,29 @@ export class BreedingForms {
         .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\r?\n/g, '<br>');
 
+    var itemUsed = [...massResultSupp, ...this.selectedBoosters, ...this.selectedOther.sort()];
+
+    if (this.stylistToken.checked) {
+      itemUsed.push('Stylist Token');
+    }
+    if (this.soulPoolPebble.checked) {
+      itemUsed.push('Soul Pool Pebble');
+    }
+
+    var massRemoveResult = '';
+    massRemoveResult += [
+      ...itemUsed.map((item) => `${item} x 1`),
+      ...(largeBag > 0 ? [`Large Sacrificial Bag x ${largeBag}`] : []),
+      ...(smallBag > 0 ? [`Small Sacrificial Bag x ${smallBag}`] : []),
+      ...(this.extraSlot !== '' &&
+      (this.extraSlotChoice.includes('Tea') ||
+        this.extraSlotChoice.includes('Talisman') ||
+        this.extraSlotChoice.includes('Starbarks'))
+        ? [`${this.extraSlotChoice} x 1`]
+        : []),
+    ].join(', ');
+
+    this.massRemove = massRemoveResult;
     this.result = renderText(profile);
   }
 }

@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MANE_TYPES } from '../shared/mane-types';
 
 const BASE_COAT_ORDER = ['Tundra', 'Tawny', 'Brown', 'Black'] as const;
 const HEALTH_STATUSES = ['Healthy', 'Inbred'] as const;
@@ -30,32 +31,6 @@ const BUILD_TYPES = [
 ] as const;
 const GENOTYPE_LINE_PATTERN =
   /^(?:Genotype\s*:\s*)?[A-Za-z0-9+.-]+(?:\/[A-Za-z0-9+.-]+)+(?:\s*\/\/\s*[A-Za-z0-9+.-]+(?:\/[A-Za-z0-9+.-]+)+)?$/i;
-const MANE_TYPES = [
-  'Natural',
-  'Natural (Spicy)',
-  'Half',
-  'Half (Royal)',
-  'Short',
-  'Rough',
-  'Sphinx',
-  'Sphinx (Xolo)',
-  'Curly',
-  'Yeti',
-  'Barbary',
-  'Razor',
-  'Razor (Mop)',
-  'Razor (Royal)',
-  'Long',
-  'Long (Gala)',
-  'Silky',
-  'Wire',
-  'Wrinkle',
-  'Wrinkle (Devon)',
-  'Crested',
-  'Caribou',
-  'Bison',
-  'Regal',
-] as const;
 type BaseName = (typeof BASE_COAT_ORDER)[number];
 type BaseCoatOption = { base: BaseName; name: string; selected: boolean };
 type DecorOption = { name: string; checked: boolean; quantity: number | null };
