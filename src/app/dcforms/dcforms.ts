@@ -1,62 +1,19 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MANE_TYPES } from '../shared/mane-types';
+import { BUILD_TYPES } from '../shared/builds';
+import { ADDABLE_PHYSICAL_TRAIT_NAMES, BASE_COAT_ORDER, BaseName, DECOR_NAMES, HEALTH_DEFECTS, HEALTH_STATUSES, SPECIAL_BASE_COATS } from './dc-data';
 
-const BASE_COAT_ORDER = ['Tundra', 'Tawny', 'Brown', 'Black'] as const;
-const HEALTH_STATUSES = ['Healthy', 'Inbred'] as const;
-const HEALTH_DEFECTS = [
-  'Infertile',
-  'Sterile',
-  'Spinal Defects',
-  'Blind',
-  'Deaf',
-  'Frail',
-  'Lame',
-] as const;
-const BUILD_TYPES = [
-  { genoLine: 'Tokota', breed: 'Canarctos venatori' },
-  { genoLine: 'Tokhara', breed: 'Canarctos fervidus' },
-  { genoLine: 'Sinaka', breed: 'Canarctos callidus' },
-  { genoLine: 'Odonyx', breed: 'Canarctos mordere' },
-  { genoLine: 'Akota', breed: 'Canarctos rex' },
-  { genoLine: 'Dakino', breed: 'Canarctos dulcis' },
-  { genoLine: 'Miralta', breed: 'Canarctos visio' },
-  { genoLine: 'Makhata', breed: 'Canarctos ensurio' },
-  { genoLine: 'Toki', breed: 'Canarctos brevis' },
-  { genoLine: '10%', breed: 'Canarctos dirus [10%]' },
-  { genoLine: '25%', breed: 'Canarctos dirus [25%]' },
-  { genoLine: '50%', breed: 'Canarctos dirus [50%]' },
-  { genoLine: '75%', breed: 'Canarctos dirus [75%]' },
-  { genoLine: '100%', breed: 'Canarctos dirus [100%]' },
-] as const;
+
 const GENOTYPE_LINE_PATTERN =
   /^(?:Genotype\s*:\s*)?[A-Za-z0-9+.-]+(?:\/[A-Za-z0-9+.-]+)+(?:\s*\/\/\s*[A-Za-z0-9+.-]+(?:\/[A-Za-z0-9+.-]+)+)?$/i;
-type BaseName = (typeof BASE_COAT_ORDER)[number];
+
 type BaseCoatOption = { base: BaseName; name: string; selected: boolean };
 type DecorOption = { name: string; checked: boolean; quantity: number | null };
 type DecorGroup = { type: string; options: DecorOption[] };
 type GenoPhysicalTrait = { name: string; carried: boolean };
 type AddablePhysicalTrait = { name: string; selected: boolean; carried: boolean };
 type GenderChangeMethod = 'potaToken' | 'metamorphosisMixture';
-
-const ADDABLE_PHYSICAL_TRAIT_NAMES = [
-  'Beard',
-  'Bob Tail',
-  'Cheek Fur',
-  'Curled Tail',
-  'Fangs',
-  'Floppy Ears',
-  'Lion Tail',
-  'Lop Ears',
-  'Raptor Claws',
-  'Roman Nose',
-  'Rose Ears',
-  'Short Claws',
-  'Small Ears',
-  'Tall Ears',
-  'Talon Claws',
-  'Tusks',
-] as const;
 
 @Component({
   imports: [FormsModule],
@@ -85,119 +42,14 @@ export class DCForms {
   protected potaTokenQuantity: number | null = 1;
   protected finalGenoAndPheno = '';
   protected formType = 'Main Thread Form';
-  protected decorGroups: DecorGroup[] = [
-    {
-      type: 'BG Stones',
-      options: [
-        { name: 'Borgas Stone', checked: false, quantity: 1 },
-        { name: 'Festive Stone', checked: false, quantity: 1 },
-        { name: 'Sikrinerks Stone', checked: false, quantity: 1 },
-        { name: 'Tribe Stone', checked: false, quantity: 1 },
-      ],
-    },
-    {
-      type: 'Handpaints',
-      options: [
-        { name: 'Aippaqs Hand Paint Dyes', checked: false, quantity: 1 },
-        { name: 'Aurora Paint', checked: false, quantity: 1 },
-        { name: 'Celestial Paint', checked: false, quantity: 1 },
-        { name: 'Crafted Hand Paint Dyes', checked: false, quantity: 1 },
-        { name: 'Event Shop Hand Paint Dyes', checked: false, quantity: 1 },
-        { name: 'Hand Paint Dyes', checked: false, quantity: 1 },
-        { name: 'Sparkling Hand Paint Dyes', checked: false, quantity: 1 },
-        { name: 'Totem Tattoo', checked: false, quantity: 1 },
-      ],
-    },
-    {
-      type: 'Body Items',
-      options: [
-        { name: 'Event Shop Large Item', checked: false, quantity: 1 },
-        { name: 'Event Shop Small Item', checked: false, quantity: 1 },
-        { name: 'Homemade Large Item', checked: false, quantity: 1 },
-        { name: 'Homemade Small Item', checked: false, quantity: 1 },
-        { name: 'Large Item', checked: false, quantity: 1 },
-        { name: 'Small Item', checked: false, quantity: 1 },
-      ],
-    },
-    {
-      type: 'Eye Items',
-      options: [
-        { name: 'Meelaniks Jinx', checked: false, quantity: 1 },
-        { name: 'Sivoganiks Charm', checked: false, quantity: 1 },
-      ],
-    },
-    {
-      type: 'Talismans',
-      options: [
-        { name: 'Forest Guardian Talisman', checked: false, quantity: 1 },
-        { name: 'Good Fortune Talisman', checked: false, quantity: 1 },
-        { name: 'Hollow Maw Talisman', checked: false, quantity: 1 },
-        { name: 'Partnership Talisman', checked: false, quantity: 1 },
-        { name: 'Storm Caller Talisman', checked: false, quantity: 1 },
-        { name: 'Sun Chaser Talisman', checked: false, quantity: 1 },
-        { name: 'Watchful Eye Talisman', checked: false, quantity: 1 },
-      ],
-    },
-    {
-      type: 'Charity Decor',
-      options: [
-        { name: 'Bouquet of Sunflowers', checked: false, quantity: 1 },
-        { name: 'Cozy Reading Nook', checked: false, quantity: 1 },
-        { name: 'Love For All Pack', checked: false, quantity: 1 },
-        { name: 'Ribbons of Endless Hope', checked: false, quantity: 1 },
-        { name: 'Seeds of Peace', checked: false, quantity: 1 },
-        { name: 'Tokens of Hope', checked: false, quantity: 1 },
-        { name: 'Well-Loved Book', checked: false, quantity: 1 },
-      ],
-    },
-
-    {
-      type: 'Other',
-      options: [
-        { name: 'Agas Charm', checked: false, quantity: 1 },
-        { name: 'Nagruks Charm', checked: false, quantity: 1 },
-        { name: 'Scar Pack', checked: false, quantity: 1 },
-        { name: 'Sikrinerk Bauble', checked: false, quantity: 1 },
-      ],
-    },
-  ];
+  protected decorGroups: DecorGroup[] = DECOR_NAMES.map((group) => ({
+    type: group.type,
+    options: group.names.map((name) => ({ name, checked: false, quantity: 1 })),
+  }));
   protected specialBaseCoat = false;
-  protected baseCoatOptions: BaseCoatOption[] = [
-    { base: 'Tundra', name: 'Senad 253', selected: false },
-    { base: 'Tundra', name: 'Saint Val 24692', selected: false },
-    { base: 'Tundra', name: 'Lemon 25971', selected: false },
-    { base: 'Tundra', name: 'Fowl 73965', selected: false },
-    { base: 'Tundra', name: 'Orchid 73966', selected: false },
-    { base: 'Tawny', name: 'Voltaire 02', selected: false },
-    { base: 'Tawny', name: 'Bear and Bird 134', selected: false },
-    { base: 'Tawny', name: 'Tonga 182', selected: false },
-    { base: 'Tawny', name: 'Antique Rose 445', selected: false },
-    { base: 'Tawny', name: 'Keeper of Souls 4181', selected: false },
-    { base: 'Tawny', name: 'Mearwen 6560', selected: false },
-    { base: 'Tawny', name: 'Queen Bee 12580', selected: false },
-    { base: 'Tawny', name: 'Corchran 21457', selected: false },
-    { base: 'Tawny', name: 'Percy FT01', selected: false },
-    { base: 'Tawny', name: 'Twonga 60032', selected: false },
-    { base: 'Brown', name: 'Melisandre 45', selected: false },
-    { base: 'Brown', name: 'Mythic 100', selected: false },
-    { base: 'Brown', name: 'Drogo 515', selected: false },
-    { base: 'Brown', name: 'Epona 600', selected: false },
-    { base: 'Brown', name: 'Morzia 608', selected: false },
-    { base: 'Brown', name: 'Jimothy WM31', selected: false },
-    { base: 'Brown', name: 'Sundance 4300', selected: false },
-    { base: 'Brown', name: 'Fenix 4600', selected: false },
-    { base: 'Brown', name: 'Oogie Boogie 6310', selected: false },
-    { base: 'Brown', name: 'Mabon 6420', selected: false },
-    { base: 'Brown', name: 'Railyard 6666', selected: false },
-    { base: 'Brown', name: 'John WM37', selected: false },
-    { base: 'Brown', name: 'Vine 7234', selected: false },
-    { base: 'Brown', name: 'Melanthios 7709', selected: false },
-    { base: 'Brown', name: 'Redcap 9083', selected: false },
-    { base: 'Brown', name: 'Whistler 23244', selected: false },
-    { base: 'Brown', name: 'Artemis 63319', selected: false },
-    { base: 'Brown', name: 'Dvora 65923', selected: false },
-    { base: 'Black', name: 'Salem 73964', selected: false },
-  ];
+  protected baseCoatOptions: BaseCoatOption[] = BASE_COAT_ORDER.flatMap((base: BaseName) =>
+    SPECIAL_BASE_COATS[base].map((name) => ({ base, name, selected: false })),
+  );
   protected designer = '';
   protected collaborativeDesigner = '';
   protected editsBy = '';

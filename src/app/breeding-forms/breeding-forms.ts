@@ -1,227 +1,17 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MANE_TYPES, RAW_MANE_TYPES } from '../shared/mane-types';
+import { RAW_MANE_TYPES } from '../shared/mane-types';
+import { BUILDS, type Build, COMPATIBLE } from '../shared/builds';
+import { escapeHtml } from '../shared/text-utils';
+import { AGA_SPRITE, BOOSTERS, CONSUMABLE_EXTRA_SPOT_WORDS, CONSUMABLE_ROOTS, CONSUMABLE_SUPP_COUNT, createTraitItems, DEFAULT_SUPP_ITEMS, EXTRA_SLOT_OPTIONS, FACTIONS, FormType, LitterMode, OTHER_GROUPS, PotlTo, ROOT_TYPES, SUPP_RULES, TALISMAN_EXTRA_SLOT, TALISMAN_EXTRA_SLOT_CHOICES, TraitItem } from './breeding-data';
 
-type FormType = 'Main' | 'Starter';
-type LitterMode = 'full' | 'split';
-type PotlTo = 'me' | 'partner';
-type SuppRule = { builds: string[]; items: string[] };
-type TraitItem = {
-  name: string;
-  checked: boolean;
-  hasBag: boolean;
-  bag: '' | 'Small' | 'Large';
-  increase: boolean | null;
-  target: string;
-  placeholder: string;
-};
 
-const FACTIONS = ['PL', 'PB', 'LK', 'KS', 'WT', 'TB', 'Neutral'];
-const BUILDS = [
-  'Tokota',
-  'Toki',
-  'Tokhara',
-  'Sinaka',
-  'Miralta',
-  'Dire',
-  'Akota',
-  'Odonyx',
-  'Dakino',
-  'Makhata',
-] as const;
-type Build = (typeof BUILDS)[number];
-const COMPATIBLE: Record<Build, Build[]> = {
-  Tokota: ['Tokota', 'Tokhara', 'Sinaka', 'Toki', 'Odonyx', 'Dakino', 'Makhata', 'Miralta', 'Dire'],
-  Tokhara: ['Tokhara', 'Sinaka', 'Toki', 'Tokota'],
-  Sinaka: ['Tokhara', 'Sinaka', 'Toki', 'Tokota'],
-  Toki: ['Tokhara', 'Sinaka', 'Toki', 'Tokota'],
-  Odonyx: ['Odonyx', 'Dakino', 'Makhata', 'Tokota'],
-  Dakino: ['Odonyx', 'Dakino', 'Makhata', 'Tokota'],
-  Makhata: ['Odonyx', 'Dakino', 'Makhata', 'Tokota'],
-  Miralta: ['Miralta', 'Tokota', 'Dire'],
-  Akota: ['Akota', 'Dire'],
-  Dire: ['Dire', 'Tokota', 'Miralta', 'Akota'],
-};
-
-const SUPP_RULES: SuppRule[] = [
-  {
-    builds: ['Dakino', 'Odonyx'],
-    items: [
-      'Breeder Box',
-      'Homemade Breeders Box',
-      "Bede's Blessing",
-      'Capybara Totem',
-      'Capybara',
-    ],
-  },
-  {
-    builds: ['Akota', 'Makhata'],
-    items: [
-      'Chonk Chews',
-      'Homemade Chonk Chews',
-      "Kodiak's Blessing",
-      'Rhinoceros Totem',
-      'Panda',
-    ],
-  },
-  {
-    builds: ['Dire', 'Miralta'],
-    items: ['Close Care', 'Homemade Close Care', "Amber's Blessing", 'Moose Totem', 'Kinkajou'],
-  },
-
-  {
-    builds: ['Tokhara', 'Sinaka'],
-    items: [
-      'Runner Rations',
-      'Homemade Runner Rations',
-      "Shenzi's Blessing",
-      'Okapi Totem',
-      'Koala',
-    ],
-  },
-];
-
-const DEFAULT_SUPP_ITEMS = [
-  'Fertility Supplements',
-  'Homemade Fertility Supplements',
-  "Oona's Blessing",
-  'Bumblebee Totem',
-  'Swan',
-];
-
-const AGA_SPRITE = 'Aga Sprite';
-
-const ROOT_TYPES = ['Fertility Root', 'Homemade Fertility Root', 'Rabbit Totem', 'Chimera Totem'];
-
-const BOOSTERS: Record<Build, string> = {
-  Tokota: 'Standard Spritzer',
-  Toki: 'Tiny Terror Tincture',
-  Dire: 'Dire Remedy',
-  Tokhara: 'Sprinter Solution',
-  Odonyx: 'Timeless Draft',
-  Akota: 'Primal Potion',
-  Dakino: 'Kino Tonic',
-  Miralta: 'Tall Draught',
-  Makhata: 'Fearsome Serum',
-  Sinaka: 'Foxy Brew',
-};
-
-const TALISMAN_EXTRA_SLOT = 'Talisman / Breeding Image / Shikoku + Shiba / Woodpecker Totem';
-const TALISMAN_EXTRA_SLOT_CHOICES = ['Inukshuk Talisman', 'Breeding Image', 'Shikoku + Shiba', 'Woodpecker Totem'] as const;
-
-const EXTRA_SLOT_OPTIONS: Record<FormType, string[]> = {
-  Main: [TALISMAN_EXTRA_SLOT, 'Passionate I', 'Passionate II', 'Starbarks'],
-  Starter: ['Ardent', 'Shikoku', 'Nestoko Tea'],
-};
-
-const OTHER_GROUPS: { title: string; items: string[] }[] = [
-  {
-    title: 'Litter Gender Potions',
-    items: ['Masculine Potion', 'Femenine Potion'],
-  },
-  {
-    title: 'Marking Reducers',
-    items: [
-      'Bearmark Blender',
-      'Blanket-B-Gone',
-      'Collar Concealer',
-      'Fade-Away Flecking',
-      'Fur Foundation',
-      'Lilac Liquefier',
-      'Marked Makeup',
-      'Moss Mask',
-      'Move-it Merle',
-      'Pangare Pouf',
-      'Piebald Purger',
-      'Quagga Quasher',
-      'Rainmark Remover',
-      'Rose Relaxer',
-      'Sable Scrubber',
-      'Saddle Separator',
-      'Saturation Shake',
-      'Seal Sealant',
-      'Thylacine Twont-B-Seen',
-    ],
-  },
-  {
-    title: 'Misc Crafting',
-    items: [
-      'Iwalani Stone',
-      'Dark Elixir',
-      'Light Elixir',
-      "Shyo's Hairclip",
-      'Shallow Carved Trinket',
-      'Deep Carved Trinket',
-      'Sunrise in a Bottle',
-      'Nighttime in a Bottle',
-      'Mirage in a Bottle',
-      'Rainbow in a Bottle',
-      'Snowstorm in a Bottle',
-      'Aurora in a Bottle',
-    ],
-  },
-  { title: 'Other', items: ['Box of Chocolates', 'Lavender'] },
-];
-
-const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"'*\[\]]/g, (character) => {
-    const entities: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-      '*': '&#42;',
-      '[': '&#91;',
-      ']': '&#93;',
-    };
-    return entities[character];
-  });
 
 function toggleIn(list: string[], name: string, checked: boolean): string[] {
   return checked ? [...list, name] : list.filter((item) => item !== name);
 }
 
-function createTraitItems(): TraitItem[] {
-  return [
-    {
-      name: 'Blessed Union',
-      checked: false,
-      hasBag: false,
-      bag: '',
-      increase: null,
-      target: '',
-      placeholder: 'Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait',
-    },
-    {
-      name: 'Offering to the Gods',
-      checked: false,
-      hasBag: true,
-      bag: '',
-      increase: null,
-      target: '',
-      placeholder: 'Which Gene does it affect?',
-    },
-    {
-      name: 'Devotion to the Spirits',
-      checked: false,
-      hasBag: true,
-      bag: '',
-      increase: null,
-      target: '',
-      placeholder: 'Which Mane Variant does it affect?',
-    },
-    {
-      name: 'Tribute to the Fates',
-      checked: false,
-      hasBag: true,
-      bag: '',
-      increase: null,
-      target: '',
-      placeholder: 'Which Mutation does it affect?',
-    },
-  ];
-}
+
 
 @Component({
   imports: [FormsModule],
@@ -236,7 +26,6 @@ export class BreedingForms {
   protected sireBuild: Build | '' = 'Tokota';
   protected damBuild: Build | '' = 'Tokota';
   formType: FormType = 'Main';
-  protected title = this.formType + ' Thread Breeding Request Form';
   username = '';
   faction = 'Neutral';
   protected litterMode: LitterMode = 'full';
@@ -263,6 +52,10 @@ export class BreedingForms {
   protected meelSprite = { checked: false, target: '' };
   protected result = '';
   protected massRemove = '';
+
+  protected get title(): string {
+    return this.formType + ' Thread Breeding Request Form';
+  }
 
   protected get rootOptions(): string[] {
     return [...ROOT_TYPES, AGA_SPRITE];
@@ -338,7 +131,6 @@ export class BreedingForms {
     }
 
     this.formType = value;
-    this.title = this.formType + ' Thread Breeding Request Form';
   }
 
   setLitterMode(value: LitterMode) {
@@ -347,6 +139,20 @@ export class BreedingForms {
       this.potlTo = '';
     }
     this.litterMode = value;
+  }
+
+  private cleanUsername(input: HTMLInputElement): string {
+    const clean = input.value.replace(/\s/g, '');
+    input.value = clean;
+    return clean;
+  }
+
+  setUsername(input: HTMLInputElement): void {
+    this.username = this.cleanUsername(input);
+  }
+
+  setSplitPartner(input: HTMLInputElement): void {
+    this.splitPartner = this.cleanUsername(input);
   }
 
   setInbreeding(checked: boolean): void {
@@ -371,7 +177,6 @@ export class BreedingForms {
   clearForm() {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
-    this.formType = 'Main';
     this.username = '';
     this.faction = 'Neutral';
     this.litterMode = 'full';
@@ -394,20 +199,34 @@ export class BreedingForms {
     this.soulPoolPebble = { checked: false, target: '' };
     this.result = '';
     this.massRemove = '';
+    this.meelSprite = { checked: false, target: '' };
   }
 
   generate() {
     const errors: string[] = [];
+    const rollIfInjuriesLine = this.rollInjuries ? 'Yes' : 'No';
+    const usingTribeBonusLine = this.useTribeBonus ? 'Yes' : 'No';
+    const selectedExtraSpot =
+      this.extraSlot === TALISMAN_EXTRA_SLOT ? this.extraSlotChoice : this.extraSlot;
+    const extraSlotLine = this.useExtraSpot ? `Yes - ${selectedExtraSpot}` : 'No';
 
     if (!this.sireBuild) errors.push('Select a Sire build.');
     if (!this.damBuild) errors.push('Select a Dam build.');
-    if (!this.username.trim()) errors.push('Enter your username.');
+    if (!this.username.trim()) {
+      errors.push('Enter your username.');
+    } else if (/\s/.test(this.username)) {
+      errors.push('Your username cannot contain spaces.');
+    }
     if (!this.canPair(this.sireBuild, this.damBuild)) {
       errors.push('The selected builds are not compatible.');
     }
 
     if (this.litterMode === 'split') {
-      if (!this.splitPartner.trim()) errors.push('Enter the split partner.');
+      if (!this.splitPartner.trim()) {
+        errors.push('Enter the split partner.');
+      } else if (/\s/.test(this.splitPartner)) {
+        errors.push('The split partner username cannot contain spaces.');
+      }
       if (!this.potlTo) errors.push('Choose who receives the POTL.');
     }
 
@@ -421,7 +240,6 @@ export class BreedingForms {
     if (this.formType === 'Starter' && this.usingRoot && !this.rootType) {
       errors.push('Select a fertility root.');
     }
-    var blessedUnioninBreeding = false;
     this.traitItems
       .filter((item) => item.checked)
       .forEach((item) => {
@@ -431,9 +249,6 @@ export class BreedingForms {
         }
         if (item.name !== 'Blessed Union' && item.increase === null) {
           errors.push(`Choose Increase or Decrease for ${item.name}.`);
-        }
-        if (item.name === 'Blessed Union') {
-          blessedUnioninBreeding = true;
         }
       });
     if (this.stylistToken.checked && !this.stylistToken.target.trim()) {
@@ -450,37 +265,39 @@ export class BreedingForms {
     if (this.soulPoolPebble.checked && !this.soulPoolPebble.target) {
       errors.push('Select a Mane for Soul Pool Pebble.');
     }
+    const hasBlessedUnion = this.traitItems.some((i) => i.checked && i.name === 'Blessed Union');
+    if (hasBlessedUnion && !(this.useExtraSpot && selectedExtraSpot === 'Breeding Image')) {
+      errors.push('Blessed Union can only be used with a Breeding Image');
+    }
 
     if (
       (this.stylistToken.checked && this.meelSprite.checked) ||
-      (this.stylistToken.checked && blessedUnioninBreeding) ||
-      (this.meelSprite.checked && blessedUnioninBreeding)
+      (this.stylistToken.checked && hasBlessedUnion) ||
+      (this.meelSprite.checked && hasBlessedUnion)
     ) {
       errors.push(
-        'Only one of this can be selected: [Stylist Token, Meelanik Sprite, Blessed Union]',
+        'Only one of these can be selected: [Stylist Token, Meelanik Sprite, Blessed Union]',
       );
-    }
-    if (blessedUnioninBreeding) {
-      if (this.extraSlotChoice !== 'Breeding Image') {
-        errors.push('Blessed Union can only be used with a Breeding Image');
-      }
     }
 
     if (
-      this.selectedOther.includes('Femenine Potion') &&
+      this.selectedOther.includes('Feminine Potion') &&
       this.selectedOther.includes('Masculine Potion')
     ) {
       errors.push('You can only select One Gender Potion.');
     }
     if (errors.length > 0) {
+      this.massRemove = '';
       this.result = errors.join('<br>');
       return;
     }
 
     let litterLine = 'Full to me';
     if (this.litterMode === 'split') {
-      const potl = this.potlTo === 'me' ? 'me' : this.splitPartner;
-      litterLine = `Split with @${this.splitPartner} - POTL to ${potl}`;
+      const partner = this.splitPartner.trim();
+      const safePartner = escapeHtml(partner);
+      const potl = this.potlTo === 'me' ? 'me' : safePartner;
+      litterLine = `Split with @${safePartner} - POTL to ${potl}`;
     }
 
     let splitLimitsLine = '-';
@@ -492,17 +309,12 @@ export class BreedingForms {
     if (this.inbreeding) {
       inbreedingLine = 'Yes';
       if (this.lastLineInbreeding) {
-        inbreedingLine += ' - Last line';
+        inbreedingLine += ' - Last Line';
       }
     }
-    const rollIfInjuriesLine = this.rollInjuries ? 'Yes' : 'No';
-    const usingTribeBonusLine = this.useTribeBonus ? 'Yes' : 'No';
-    const selectedExtraSpot =
-      this.extraSlot === TALISMAN_EXTRA_SLOT ? this.extraSlotChoice : this.extraSlot;
-    const extraSlotLine = this.useExtraSpot ? `Yes - ${selectedExtraSpot}` : 'No';
 
-    var largeBag = 0;
-    var smallBag = 0;
+    let largeBag = 0;
+    let smallBag = 0;
     const traitLines = this.traitItems
       .filter((i) => i.checked)
       .map((i) => {
@@ -551,29 +363,17 @@ export class BreedingForms {
       `**.**`,
       `**Supplementary Items:**`,
     ];
-    const massResultSupp = [];
+    const massResultSupp: string[] = [];
 
     let middlePart: string[] = [];
     if (this.formType === 'Main') {
       middlePart = [`**- Litter Size Supps:** ${this.litterSupps.trim() ? this.litterSupps : '-'}`];
-      if (
-        this.litterSupps.trim() !== '' &&
-        this.litterSupps != 'Aga Sprite' &&
-        !this.litterSupps.includes('Blessing') &&
-        !this.litterSupps.includes('Totem') &&
-        this.litterSupps != 'Panda' &&
-        this.litterSupps != 'Swan' &&
-        this.litterSupps != 'Koala' &&
-        this.litterSupps != 'Capybara' &&
-        this.litterSupps != 'Kinkajou'
-      ) {
+      if (this.suppItems.indexOf(this.litterSupps) < CONSUMABLE_SUPP_COUNT && this.litterSupps)
         massResultSupp.push(this.litterSupps);
-      }
     } else {
       middlePart = [`**- Fertility Root:** ${this.usingRoot ? `Yes - ${this.rootType}` : 'No'}`];
       if (this.usingRoot) {
-        if (this.rootType === 'Fertility Root' || this.rootType === 'Homemade Fertility Root')
-          massResultSupp.push(this.rootType);
+        if (CONSUMABLE_ROOTS.includes(this.rootType)) massResultSupp.push(this.rootType);
       }
     }
     const otherLines = [
@@ -586,7 +386,7 @@ export class BreedingForms {
     otherLines.push(...traitLines);
 
     const lastPart = [
-      `**- Build Supps**: ${this.selectedBoosters.sort().join(', ') || '-'}`,
+      `**- Build Supps**: ${[...this.selectedBoosters].sort().join(', ') || '-'}`,
       `**- Other:** ${otherLines.length > 0 ? otherLines.join(', ') : '-'}`,
       `**.**`,
       `**Using Tribe Rare Mane Bonus?**: ${usingTribeBonusLine}`,
@@ -607,7 +407,11 @@ export class BreedingForms {
         .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\r?\n/g, '<br>');
 
-    var itemUsed = [...massResultSupp, ...this.selectedBoosters, ...this.selectedOther.sort()];
+    const itemUsed = [
+      ...massResultSupp,
+      ...this.selectedBoosters,
+      ...[...this.selectedOther].sort(),
+    ];
 
     if (this.stylistToken.checked) {
       itemUsed.push('Stylist Token');
@@ -616,17 +420,14 @@ export class BreedingForms {
       itemUsed.push('Soul Pool Pebble');
     }
 
-    var massRemoveResult = '';
+    const extraItem = this.useExtraSpot ? selectedExtraSpot : '';
+    const extraConsumed = CONSUMABLE_EXTRA_SPOT_WORDS.some((k) => extraItem.includes(k));
+    let massRemoveResult = '';
     massRemoveResult += [
       ...itemUsed.map((item) => `${item} x 1`),
       ...(largeBag > 0 ? [`Large Sacrificial Bag x ${largeBag}`] : []),
       ...(smallBag > 0 ? [`Small Sacrificial Bag x ${smallBag}`] : []),
-      ...(this.extraSlot !== '' &&
-      (this.extraSlotChoice.includes('Tea') ||
-        this.extraSlotChoice.includes('Talisman') ||
-        this.extraSlotChoice.includes('Starbarks'))
-        ? [`${this.extraSlotChoice} x 1`]
-        : []),
+      ...(extraConsumed ? [`${extraItem} x 1`] : []),
     ].join(', ');
 
     this.massRemove = massRemoveResult;

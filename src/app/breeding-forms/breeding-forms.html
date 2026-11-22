@@ -3,7 +3,6 @@
     <div class="card-body p-3 p-md-4">
       <h1 class="h2 fw-bold text-center mb-3">{{ title }}</h1>
 
-
       <fieldset class="border rounded p-3 mb-4">
         <legend class="float-none w-auto px-2 fs-6 fw-semibold">Form type</legend>
         <div class="btn-group w-100" role="group" aria-label="Form type">
@@ -34,10 +33,10 @@
 
       <div class="row g-3 mb-4">
         <div class="d-flex justify-content-center mb-4">
-        <button type="button" class="btn btn-outline-secondary" (click)="resetBuilds()">
-          Reset Sire and Dam to Tokota
-        </button>
-      </div>
+          <button type="button" class="btn btn-outline-secondary" (click)="resetBuilds()">
+            Reset Sire and Dam to Tokota
+          </button>
+        </div>
         <div class="col-12 col-md-6">
           <fieldset
             class="border rounded p-3 h-100"
@@ -58,7 +57,7 @@
                 <div class="col">
                   <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
                     <input
-                      class="form-check-input m-0"Ff
+                      class="form-check-input m-0"
                       type="radio"
                       name="sireBuild"
                       [value]="build"
@@ -141,11 +140,12 @@
             class="form-control"
             type="text"
             [class.is-invalid]="!username.trim()"
-            [(ngModel)]="username"
-            name="username"
+            [value]="username"
+            (input)="setUsername($any($event.target))"
             autocomplete="username"
             placeholder="Enter your Tokotna username"
           />
+          <div class="form-text">Usernames cannot contain spaces.</div>
         </div>
         <div class="col-12 col-md-6">
           <label for="faction" class="form-label fw-semibold">Faction</label>
@@ -201,15 +201,17 @@
                     REQUIRED
                   </span>
                 </label>
-                <input
+                                <input
                   id="splitPartner"
                   class="form-control"
                   type="text"
                   [class.is-invalid]="!splitPartner.trim()"
-                  [(ngModel)]="splitPartner"
-                  name="splitPartner"
-                  placeholder="Enter the partner's username"
+                  [value]="splitPartner"
+                  (input)="setSplitPartner($any($event.target))"
+                  autocomplete="off"
+                  placeholder="Enter your Split Partner's Tokotna username"
                 />
+                <div class="form-text">Usernames cannot contain spaces.</div>
               </div>
               <fieldset class="col-12 col-md-6">
                 <legend class="form-label fw-semibold fs-6">
@@ -274,7 +276,9 @@
                 [(ngModel)]="lastLineInbreeding"
                 name="lastLineInbreeding"
               />
-              <label class="form-check-label" for="lastLineInbreeding">Last line</label>
+              <label class="form-check-label" for="lastLineInbreeding"
+                >Is Last Line Inbreeding</label
+              >
             </div>
           }
           <div class="form-check mb-2">
@@ -304,7 +308,9 @@
 
           @if (formType === 'Main') {
             <fieldset class="border rounded p-3">
-              <legend class="float-none w-auto px-2 fs-6 fw-semibold">Litter size supplement</legend>
+              <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+                Litter size supplement
+              </legend>
               <div class="row row-cols-1 row-cols-md-2 g-2">
                 @for (item of suppItems; track item) {
                   <div class="col">
@@ -409,8 +415,8 @@
                   Choose one
                   <span
                     class="badge ms-1"
-                    [class.text-bg-danger]="!extraSlot"
-                    [class.text-bg-success]="!!extraSlot"
+                    [class.text-bg-danger]="!extraSlotChoice"
+                    [class.text-bg-success]="!!extraSlotChoice"
                   >
                     REQUIRED
                   </span>
@@ -499,7 +505,9 @@
       <section class="card bg-light mb-4" aria-label="Trait items">
         <div class="card-body">
           <h2 class="h5 fw-bold mb-2">Using Traits on the Breeding</h2>
-          <p class="form-text">For each selected item, describe its effect and bag size if needed.</p>
+          <p class="form-text">
+            For each selected item, describe its effect and bag size if needed.
+          </p>
           <div class="row row-cols-1 row-cols-lg-2 g-3">
             @for (item of traitItems; track item.name) {
               <div class="col">
@@ -650,7 +658,7 @@
           }
         </div>
       </section>
-       <section class="card bg-light mb-4" aria-label="Meel Sprite">
+      <section class="card bg-light mb-4" aria-label="Meelanik Sprite">
         <div class="card-body">
           <div class="form-check">
             <input
@@ -660,7 +668,7 @@
               [(ngModel)]="meelSprite.checked"
               name="meelSprite"
             />
-            <label class="form-check-label fw-semibold" for="meelSprite">Meel Sprite</label>
+            <label class="form-check-label fw-semibold" for="meelSprite">Meelanik Sprite</label>
           </div>
           @if (meelSprite.checked) {
             <div class="mt-2">
@@ -710,7 +718,10 @@
                   [class.text-bg-danger]="!soulPoolPebble.target"
                   [class.text-bg-success]="!!soulPoolPebble.target"
                   >REQUIRED</span
-                ><br><small>Make sure you check the available Manes to Pebble for your pairing from the Breeding Roller or Mane Calculator!</small>
+                ><br /><small
+                  >Make sure you check the available Manes to Pebble for your pairing from the
+                  Breeding Roller or Mane Calculator!</small
+                >
               </label>
               <select
                 id="soulPoolPebbleTarget"
@@ -734,7 +745,9 @@
       </div>
 
       <section class="mb-3" aria-labelledby="breeding-result-label">
-        <h2 id="breeding-result-label" class="h5 fw-bold">{{ title }} - Copy Paste (Check it for possible Errors)</h2>
+        <h2 id="breeding-result-label" class="h5 fw-bold">
+          {{ title }} - Copy Paste (Check it for possible Errors)
+        </h2>
         <em>All the text in red should be filled manually!</em>
         <div
           class="border rounded bg-light p-3 text-break user-select-all"
@@ -745,18 +758,18 @@
         ></div>
       </section>
 
-      <section class="mb-3" aria-labelledby="breeding-result-label">
-        <h2 id="breeding-result-label" class="h5 fw-bold">Mass Remove Log</h2>
+      <section class="mb-3" aria-labelledby="mass-remove-label">
+        <h2 id="mass-remove-label" class="h5 fw-bold">Mass Remove Log</h2>
         <em>Do not include this on your form, its just a test</em>
         <div
           class="border rounded bg-light p-3 text-break user-select-all"
           role="region"
-          aria-labelledby="breeding-result-label"
+          aria-labelledby="mass-remove-label"
           tabindex="0"
           [innerHTML]="massRemove"
         ></div>
       </section>
-
+      <hr />
       <div class="d-grid">
         <button type="button" class="btn btn-outline-secondary" (click)="clearForm()">
           Clear all
