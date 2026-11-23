@@ -25,7 +25,6 @@ export const VARIANT_MANE_TYPES = [
   'Razor (Mop)',
   'Razor (Royal)',
   'Long (Gala)',
-
   'Wrinkle (Devon)',
 ] as const;
 

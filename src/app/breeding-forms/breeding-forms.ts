@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RAW_MANE_TYPES } from '../shared/mane-types';
+import { RAW_MANE_TYPES, VARIANT_MANE_TYPES } from '../shared/mane-types';
 import { BUILDS, type Build, COMPATIBLE } from '../shared/builds';
-import { escapeHtml } from '../shared/text-utils';
-import { AGA_SPRITE, BOOSTERS, CONSUMABLE_EXTRA_SPOT_WORDS, CONSUMABLE_ROOTS, CONSUMABLE_SUPP_COUNT, createTraitItems, DEFAULT_SUPP_ITEMS, EXTRA_SLOT_OPTIONS, FACTIONS, FormType, LitterMode, OTHER_GROUPS, PotlTo, ROOT_TYPES, SUPP_RULES, TALISMAN_EXTRA_SLOT, TALISMAN_EXTRA_SLOT_CHOICES, TraitItem } from './breeding-data';
+import { escapeBasic, escapeHtml, formatParentBlock } from '../shared/text-utils';
+import { AGA_SPRITE, BOOSTERS, CONSUMABLE_EXTRA_SPOT_WORDS, CONSUMABLE_ROOTS, CONSUMABLE_SUPP_COUNT, createTraitItems, DEFAULT_SUPP_ITEMS, EXTRA_SLOT_OPTIONS, FACTIONS, FormType, LitterMode, OTHER_GROUPS, parentPlaceholder, PotlTo, ROOT_TYPES, SUPP_RULES, TALISMAN_EXTRA_SLOT, TALISMAN_EXTRA_SLOT_CHOICES, TraitItem, withBoldLabels } from './breeding-data';
 
 
 
@@ -20,6 +20,8 @@ function toggleIn(list: string[], name: string, checked: boolean): string[] {
   templateUrl: './breeding-forms.html',
 })
 export class BreedingForms {
+  protected variantManeTypes = VARIANT_MANE_TYPES;
+  readonly parentPlaceholder = parentPlaceholder;
   protected builds = BUILDS;
   protected factions = FACTIONS;
   protected otherGroups = OTHER_GROUPS;
@@ -52,6 +54,80 @@ export class BreedingForms {
   protected meelSprite = { checked: false, target: '' };
   protected result = '';
   protected massRemove = '';
+  protected sireBlock = '';
+  protected damBlock = '';
+  breedingRollerFilled = false;
+  breedingRollerLink = '';
+
+  onRollerPaste(event: ClipboardEvent): void {
+    const html = event.clipboardData?.getData('text/html');
+    if (html) {
+      const match = html.match(/href=["'](https?:\/\/tokotna\.com\/breeding\/[^"']+)["']/i);
+      if (match?.[1]) {
+        event.preventDefault();
+        this.breedingRollerLink = match[1].replace(/&amp;/g, '&');
+        return;
+      }
+    }
+  }
+
+  onParentPaste(event: ClipboardEvent, role: 'sire' | 'dam'): void {
+    const html = event.clipboardData?.getData('text/html');
+    if (!html) return;
+
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    // Replace every <a> tag in the pasted HTML with literal "<a href='...'>Text</a>"
+    doc.querySelectorAll('a').forEach((anchor) => {
+      const href = anchor.getAttribute('href');
+      const text = anchor.textContent?.trim();
+      if (href && text) {
+        anchor.replaceWith(`<a href="${href}">${text}</a>`);
+      }
+    });
+
+    // Extract clean lines while preserving paragraph/line breaks from Tokotna's HTML
+    const blockTags = new Set(['P', 'DIV', 'BR', 'LI']);
+    let result = '';
+
+    const walk = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        result += node.textContent ?? '';
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        if (el.tagName === 'BR') {
+          result += '\n';
+          return;
+        }
+        el.childNodes.forEach(walk);
+        if (blockTags.has(el.tagName)) {
+          result += '\n';
+        }
+      }
+    };
+
+    walk(doc.body);
+
+    const cleanedText = result
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line, index, arr) => line !== '' || (index > 0 && arr[index - 1] !== ''))
+      .join('\n')
+      .trim();
+
+    if (cleanedText.includes('<a href=')) {
+      event.preventDefault();
+      if (role === 'sire') {
+        this.sireBlock = cleanedText;
+      } else {
+        this.damBlock = cleanedText;
+      }
+    }
+  }
+
+
+
+
 
   protected get title(): string {
     return this.formType + ' Thread Breeding Request Form';
@@ -168,11 +244,13 @@ export class BreedingForms {
 
   setItemChecked(item: TraitItem, checked: boolean) {
     item.checked = checked;
-    if (!checked) {
-      item.bag = '';
-      item.increase = null;
-      item.target = '';
-    }
+  if (checked && item.name === 'Devotion to the Spirits') {
+    item.increase = true;
+  } else if (!checked) {
+    item.bag = '';
+    item.increase = null;
+    item.target = '';
+  }
   }
   clearForm() {
     this.sireBuild = 'Tokota';
@@ -200,6 +278,9 @@ export class BreedingForms {
     this.result = '';
     this.massRemove = '';
     this.meelSprite = { checked: false, target: '' };
+    this.breedingRollerFilled = false;
+    this.breedingRollerLink = '';
+
   }
 
   generate() {
@@ -235,6 +316,13 @@ export class BreedingForms {
     }
     if (this.useExtraSpot && this.extraSlot === TALISMAN_EXTRA_SLOT && !this.extraSlotChoice) {
       errors.push('Choose an option for the Talisman extra spot.');
+    }
+
+    if (this.sireBlock.trim() && !/^\s*Sire\s*:/i.test(this.sireBlock)) {
+      errors.push('The Sire Box must start with "Sire"');
+    }
+    if (this.damBlock.trim() && !/^\s*Dam\s*:/i.test(this.damBlock)) {
+      errors.push('The Dam Box must start with "Dam"');
     }
 
     if (this.formType === 'Starter' && this.usingRoot && !this.rootType) {
@@ -286,9 +374,15 @@ export class BreedingForms {
     ) {
       errors.push('You can only select One Gender Potion.');
     }
+
+    if (this.breedingRollerFilled && !this.breedingRollerLink.trim()) {
+      errors.push('Enter the Filled Breeding Roller ID Link.');
+    }
+
+
     if (errors.length > 0) {
       this.massRemove = '';
-      this.result = errors.join('<br>');
+      this.result = `Please fix all the following errors before generating the form:<ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`;
       return;
     }
 
@@ -343,16 +437,21 @@ export class BreedingForms {
       ? `Soul Pool Pebble (${escapeHtml(this.soulPoolPebble.target)})`
       : undefined;
 
+    const sireLines = this.sireBlock.trim()
+      ? formatParentBlock(this.sireBlock.trim(), 'Sire')
+      : formatParentBlock(parentPlaceholder('Sire'), 'Sire', true);
+
+    const damLines = this.damBlock.trim()
+      ? formatParentBlock(this.damBlock.trim(), 'Dam')
+      : formatParentBlock(parentPlaceholder('Dam'), 'Dam', true);
+
+
     const firstPart = [
-      `<span class="text-danger">**Sire:** (Link to Tokotna Import page)</span>`,
-      `<span class="text-danger">**Owner Approval:**  (Leave blank if you are the owner) </span>`,
-      `<span class="text-danger">**Sire's Hereditary Mutations/Traits/Breeding Companions:** </span>`,
-      `<span class="text-danger">**.** </span>`,
-      `<span class="text-danger">**x** </span>`,
-      `<span class="text-danger">**.** </span>`,
-      `<span class="text-danger">**Dam:** (Link to Tokotna Import page)</span>`,
-      `<span class="text-danger">**Owner Approval:**  (Leave blank if you are the owner) </span>`,
-      `<span class="text-danger">**Dam's Hereditary Mutations/Traits/Breeding Companions:**</span>`,
+      ...sireLines,
+      `**.**`,
+      `**x**`,
+      `**.**`,
+      ...damLines,
       `**.**`,
       `**Bonuses & Monthly Limits**: [${escapeHtml(this.username.trim())}'s Bonuses & Monthly Limits](https://tokotna.com/profile/limits/index.php?user=${encodeURIComponent(this.username.trim())})`,
       `**Litter Specifications**: ${litterLine}`,
@@ -385,15 +484,28 @@ export class BreedingForms {
     otherLines.sort();
     otherLines.push(...traitLines);
 
+    const commaSeparatedOther = otherLines.length > 0 ? otherLines.join(', ') : '-';
+
+    const listedOther =
+      otherLines.length > 0
+        ? `\n${otherLines.map((item) => `\u00A0\u00A0\u00A0\u00A0- ${item}`).join('\n')}`
+        : '-';
+
+    const cleanRollerLink = escapeBasic(this.breedingRollerLink.trim());
+
+    const filledBreedingRollerLine = this.breedingRollerFilled
+      ? `**Filled Breeding Roller ID Link:** <a href="${cleanRollerLink}">Breeding Roller ID Link</a>`
+      : `<span class="text-danger">**Filled Breeding Roller ID Link:** (Link to the filled out Breeding Roller, leave blank if unable)</span>`;
+
     const lastPart = [
       `**- Build Supps**: ${[...this.selectedBoosters].sort().join(', ') || '-'}`,
-      `**- Other:** ${otherLines.length > 0 ? otherLines.join(', ') : '-'}`,
+      `**- Other:** ${listedOther}`,
       `**.**`,
       `**Using Tribe Rare Mane Bonus?**: ${usingTribeBonusLine}`,
       `**.**`,
       `**Using Extra Breeding Spot?** ${extraSlotLine}`,
       `**.**`,
-      `<span class="text-danger">**Filled Breeding Roller ID Link:** (Link to the filled out Breeding Roller, leave blank if unable)</span> `,
+      filledBreedingRollerLine
     ];
 
     const profile = [...firstPart, ...middlePart, ...lastPart].join('\n');

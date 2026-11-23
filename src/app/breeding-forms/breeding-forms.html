@@ -6,27 +6,11 @@
       <fieldset class="border rounded p-3 mb-4">
         <legend class="float-none w-auto px-2 fs-6 fw-semibold">Form type</legend>
         <div class="btn-group w-100" role="group" aria-label="Form type">
-          <input
-            id="formTypeMain"
-            class="btn-check"
-            type="radio"
-            name="formType"
-            value="Main"
-            autocomplete="off"
-            [ngModel]="formType"
-            (ngModelChange)="setFormType($event)"
-          />
+          <input id="formTypeMain" class="btn-check" type="radio" name="formType" value="Main" autocomplete="off"
+            [ngModel]="formType" (ngModelChange)="setFormType($event)" />
           <label class="btn btn-outline-primary flex-fill" for="formTypeMain">Main</label>
-          <input
-            id="formTypeStarter"
-            class="btn-check"
-            type="radio"
-            name="formType"
-            value="Starter"
-            autocomplete="off"
-            [ngModel]="formType"
-            (ngModelChange)="setFormType($event)"
-          />
+          <input id="formTypeStarter" class="btn-check" type="radio" name="formType" value="Starter" autocomplete="off"
+            [ngModel]="formType" (ngModelChange)="setFormType($event)" />
           <label class="btn btn-outline-primary flex-fill" for="formTypeStarter">Starter</label>
         </div>
       </fieldset>
@@ -38,120 +22,111 @@
           </button>
         </div>
         <div class="col-12 col-md-6">
-          <fieldset
-            class="border rounded p-3 h-100"
-            [class.border-danger]="!sireBuild"
-            aria-describedby="sire-build-help"
-          >
+          <fieldset class="border rounded p-3 h-100" [class.border-danger]="!sireBuild"
+            aria-describedby="sire-build-help">
             <legend class="float-none w-auto px-2 fs-6 fw-semibold">
               Sire build
-              <span
-                class="badge ms-1"
-                [class.text-bg-danger]="!sireBuild"
-                [class.text-bg-success]="!!sireBuild"
-                >REQUIRED</span
-              >
+              <span class="badge ms-1" [class.text-bg-danger]="!sireBuild"
+                [class.text-bg-success]="!!sireBuild">REQUIRED</span>
             </legend>
             <div class="row row-cols-1 row-cols-sm-2 g-2">
               @for (build of builds; track build) {
-                <div class="col">
-                  <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
-                    <input
-                      class="form-check-input m-0"
-                      type="radio"
-                      name="sireBuild"
-                      [value]="build"
-                      [disabled]="!canPair(build, damBuild)"
-                      [ngModel]="sireBuild"
-                      (ngModelChange)="setSire($event)"
-                    />
-                    <span class="form-check-label">{{ build }}</span>
-                  </label>
-                </div>
+              <div class="col">
+                <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
+                  <input class="form-check-input m-0" type="radio" name="sireBuild" [value]="build"
+                    [disabled]="!canPair(build, damBuild)" [ngModel]="sireBuild" (ngModelChange)="setSire($event)" />
+                  <span class="form-check-label">{{ build }}</span>
+                </label>
+              </div>
               }
             </div>
             @if (!sireBuild) {
-              <div id="sire-build-help" class="form-text text-danger">Choose a Sire build.</div>
+            <div id="sire-build-help" class="form-text text-danger">Choose a Sire build.</div>
             }
             <div class="form-text">Builds incompatible with the selected Dam are disabled.</div>
           </fieldset>
         </div>
 
+
         <div class="col-12 col-md-6">
-          <fieldset
-            class="border rounded p-3 h-100"
-            [class.border-danger]="!damBuild"
-            aria-describedby="dam-build-help"
-          >
+          <fieldset class="border rounded p-3 h-100" [class.border-danger]="!damBuild"
+            aria-describedby="dam-build-help">
             <legend class="float-none w-auto px-2 fs-6 fw-semibold">
               Dam build
-              <span
-                class="badge ms-1"
-                [class.text-bg-danger]="!damBuild"
-                [class.text-bg-success]="!!damBuild"
-                >REQUIRED</span
-              >
+              <span class="badge ms-1" [class.text-bg-danger]="!damBuild"
+                [class.text-bg-success]="!!damBuild">REQUIRED</span>
             </legend>
             <div class="row row-cols-1 row-cols-sm-2 g-2">
               @for (build of builds; track build) {
-                <div class="col">
-                  <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
-                    <input
-                      class="form-check-input m-0"
-                      type="radio"
-                      name="damBuild"
-                      [value]="build"
-                      [disabled]="!canPair(sireBuild, build)"
-                      [ngModel]="damBuild"
-                      (ngModelChange)="setDam($event)"
-                    />
-                    <span class="form-check-label">{{ build }}</span>
-                  </label>
-                </div>
+              <div class="col">
+                <label class="border rounded bg-light p-2 d-flex align-items-center gap-2 h-100">
+                  <input class="form-check-input m-0" type="radio" name="damBuild" [value]="build"
+                    [disabled]="!canPair(sireBuild, build)" [ngModel]="damBuild" (ngModelChange)="setDam($event)" />
+                  <span class="form-check-label">{{ build }}</span>
+                </label>
+              </div>
               }
             </div>
             @if (!damBuild) {
-              <div id="dam-build-help" class="form-text text-danger">Choose a Dam build.</div>
+            <div id="dam-build-help" class="form-text text-danger">Choose a Dam build.</div>
             }
             <div class="form-text">Builds incompatible with the selected Sire are disabled.</div>
           </fieldset>
         </div>
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label for="sireBlock" class="form-label fw-semibold">
+              Sire Block<br>
+              <span class="fw-normal text-muted">
+                Pasted from Tokotna or leave blank to fill later.<br />
+                When pasting, links will turn into <code>&lt;a href="..."&gt;</code> — don't worry, this is expected!
+              </span>
+            </label>
+
+            <textarea id="sireBlock" class="form-control" rows="4" required [(ngModel)]="sireBlock"
+              (paste)="onParentPaste($event, 'sire')" [placeholder]="parentPlaceholder('Sire')"></textarea>
+
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="damBlock" class="form-label fw-semibold">
+              Dam Block<br>
+              <span class="fw-normal text-muted">
+                Pasted from Tokotna or leave blank to fill later.<br />
+                When pasting, links will turn into <code>&lt;a href="..."&gt;</code> — don't worry, this is expected!
+              </span>
+            </label>
+            <textarea id="damBlock" class="form-control" rows="4" required [(ngModel)]="damBlock"
+              (paste)="onParentPaste($event, 'dam')" [placeholder]="parentPlaceholder('Dam')"></textarea>
+
+
+          </div>
+        </div>
       </div>
 
       @if (sireBuild && damBuild && !canPair(sireBuild, damBuild)) {
-        <div class="alert alert-danger" role="alert">
-          These builds are not compatible. Choose a different Sire or Dam build.
-        </div>
+      <div class="alert alert-danger" role="alert">
+        These builds are not compatible. Choose a different Sire or Dam build.
+      </div>
       }
+      <hr>
 
       <div class="row g-3 mb-4">
         <div class="col-12 col-md-6">
           <label for="username" class="form-label fw-semibold">
             Tokotna username
-            <span
-              class="badge ms-1"
-              [class.text-bg-danger]="!username.trim()"
-              [class.text-bg-success]="username.trim().length > 0"
-              >REQUIRED</span
-            >
+            <span class="badge ms-1" [class.text-bg-danger]="!username.trim()"
+              [class.text-bg-success]="username.trim().length > 0">REQUIRED</span>
           </label>
-          <input
-            id="username"
-            class="form-control"
-            type="text"
-            [class.is-invalid]="!username.trim()"
-            [value]="username"
-            (input)="setUsername($any($event.target))"
-            autocomplete="username"
-            placeholder="Enter your Tokotna username"
-          />
+          <input id="username" class="form-control" type="text" [class.is-invalid]="!username.trim()" [value]="username"
+            (input)="setUsername($any($event.target))" autocomplete="username"
+            placeholder="Enter your Tokotna username" />
           <div class="form-text">Usernames cannot contain spaces.</div>
         </div>
         <div class="col-12 col-md-6">
           <label for="faction" class="form-label fw-semibold">Faction</label>
           <select id="faction" class="form-select" [(ngModel)]="faction" name="faction">
             @for (item of factions; track item) {
-              <option [value]="item">{{ item }}</option>
+            <option [value]="item">{{ item }}</option>
             }
           </select>
         </div>
@@ -160,214 +135,125 @@
       <fieldset class="border rounded p-3 mb-3">
         <legend class="float-none w-auto px-2 fs-6 fw-semibold">Litter type</legend>
         <div class="btn-group w-100" role="group" aria-label="Litter type">
-          <input
-            id="litterFull"
-            class="btn-check"
-            type="radio"
-            name="litterMode"
-            value="full"
-            autocomplete="off"
-            [ngModel]="litterMode"
-            (ngModelChange)="setLitterMode($event)"
-          />
+          <input id="litterFull" class="btn-check" type="radio" name="litterMode" value="full" autocomplete="off"
+            [ngModel]="litterMode" (ngModelChange)="setLitterMode($event)" />
           <label class="btn btn-outline-primary flex-fill" for="litterFull">Full litter</label>
-          <input
-            id="litterSplit"
-            class="btn-check"
-            type="radio"
-            name="litterMode"
-            value="split"
-            autocomplete="off"
-            [ngModel]="litterMode"
-            (ngModelChange)="setLitterMode($event)"
-          />
+          <input id="litterSplit" class="btn-check" type="radio" name="litterMode" value="split" autocomplete="off"
+            [ngModel]="litterMode" (ngModelChange)="setLitterMode($event)" />
           <label class="btn btn-outline-primary flex-fill" for="litterSplit">Split litter</label>
         </div>
       </fieldset>
 
       @if (litterMode === 'split') {
-        <section class="card bg-light mb-4" aria-label="Split litter details">
-          <div class="card-body">
-            <h2 class="h5 fw-bold mb-3">Split litter details</h2>
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label for="splitPartner" class="form-label fw-semibold">
-                  Split partner username
-                  <span
-                    class="badge ms-1"
-                    [class.text-bg-danger]="!splitPartner.trim()"
-                    [class.text-bg-success]="splitPartner.trim().length > 0"
-                  >
-                    REQUIRED
-                  </span>
-                </label>
-                                <input
-                  id="splitPartner"
-                  class="form-control"
-                  type="text"
-                  [class.is-invalid]="!splitPartner.trim()"
-                  [value]="splitPartner"
-                  (input)="setSplitPartner($any($event.target))"
-                  autocomplete="off"
-                  placeholder="Enter your Split Partner's Tokotna username"
-                />
-                <div class="form-text">Usernames cannot contain spaces.</div>
-              </div>
-              <fieldset class="col-12 col-md-6">
-                <legend class="form-label fw-semibold fs-6">
-                  POTL goes to
-                  <span
-                    class="badge ms-1"
-                    [class.text-bg-danger]="!potlTo"
-                    [class.text-bg-success]="!!potlTo"
-                    >REQUIRED</span
-                  >
-                </legend>
-                <div class="btn-group w-100" role="group" aria-label="POTL goes to">
-                  <input
-                    id="potlToMe"
-                    class="btn-check"
-                    type="radio"
-                    name="potlTo"
-                    value="me"
-                    autocomplete="off"
-                    [(ngModel)]="potlTo"
-                  />
-                  <label class="btn btn-outline-primary flex-fill" for="potlToMe">Me</label>
-                  <input
-                    id="potlToPartner"
-                    class="btn-check"
-                    type="radio"
-                    name="potlTo"
-                    value="partner"
-                    autocomplete="off"
-                    [(ngModel)]="potlTo"
-                  />
-                  <label class="btn btn-outline-primary flex-fill" for="potlToPartner">
-                    Split partner
-                  </label>
-                </div>
-              </fieldset>
+      <section class="card bg-light mb-4" aria-label="Split litter details">
+        <div class="card-body">
+          <h2 class="h5 fw-bold mb-3">Split litter details</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="splitPartner" class="form-label fw-semibold">
+                Split partner username
+                <span class="badge ms-1" [class.text-bg-danger]="!splitPartner.trim()"
+                  [class.text-bg-success]="splitPartner.trim().length > 0">
+                  REQUIRED
+                </span>
+              </label>
+              <input id="splitPartner" class="form-control" type="text" [class.is-invalid]="!splitPartner.trim()"
+                [value]="splitPartner" (input)="setSplitPartner($any($event.target))" autocomplete="off"
+                placeholder="Enter your Split Partner's Tokotna username" />
+              <div class="form-text">Usernames cannot contain spaces.</div>
             </div>
+            <fieldset class="col-12 col-md-6">
+              <legend class="form-label fw-semibold fs-6">
+                POTL goes to
+                <span class="badge ms-1" [class.text-bg-danger]="!potlTo"
+                  [class.text-bg-success]="!!potlTo">REQUIRED</span>
+              </legend>
+              <div class="btn-group w-100" role="group" aria-label="POTL goes to">
+                <input id="potlToMe" class="btn-check" type="radio" name="potlTo" value="me" autocomplete="off"
+                  [(ngModel)]="potlTo" />
+                <label class="btn btn-outline-primary flex-fill" for="potlToMe">Me</label>
+                <input id="potlToPartner" class="btn-check" type="radio" name="potlTo" value="partner"
+                  autocomplete="off" [(ngModel)]="potlTo" />
+                <label class="btn btn-outline-primary flex-fill" for="potlToPartner">
+                  Split partner
+                </label>
+              </div>
+            </fieldset>
           </div>
-        </section>
+        </div>
+      </section>
       }
 
       <section class="card bg-light mb-4" aria-label="Breeding options">
         <div class="card-body">
           <h2 class="h5 fw-bold mb-3">Breeding options</h2>
           <div class="form-check mb-2">
-            <input
-              id="inbreeding"
-              class="form-check-input"
-              type="checkbox"
-              [ngModel]="inbreeding"
-              (ngModelChange)="setInbreeding($event)"
-              name="inbreeding"
-            />
+            <input id="inbreeding" class="form-check-input" type="checkbox" [ngModel]="inbreeding"
+              (ngModelChange)="setInbreeding($event)" name="inbreeding" />
             <label class="form-check-label fw-semibold" for="inbreeding">Inbreeding present</label>
           </div>
           @if (inbreeding) {
-            <div class="form-check mb-3 ms-4">
-              <input
-                id="lastLineInbreeding"
-                class="form-check-input"
-                type="checkbox"
-                [(ngModel)]="lastLineInbreeding"
-                name="lastLineInbreeding"
-              />
-              <label class="form-check-label" for="lastLineInbreeding"
-                >Is Last Line Inbreeding</label
-              >
-            </div>
+          <div class="form-check mb-3 ms-4">
+            <input id="lastLineInbreeding" class="form-check-input" type="checkbox" [(ngModel)]="lastLineInbreeding"
+              name="lastLineInbreeding" />
+            <label class="form-check-label" for="lastLineInbreeding">Is Last Line Inbreeding</label>
+          </div>
           }
           <div class="form-check mb-2">
-            <input
-              id="rollInjuries"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="rollInjuries"
-              name="rollInjuries"
-            />
+            <input id="rollInjuries" class="form-check-input" type="checkbox" [(ngModel)]="rollInjuries"
+              name="rollInjuries" />
             <label class="form-check-label fw-semibold" for="rollInjuries">
               Roll if injuries are present
             </label>
           </div>
           <div class="form-check mb-3">
-            <input
-              id="useTribeBonus"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="useTribeBonus"
-              name="useTribeBonus"
-            />
+            <input id="useTribeBonus" class="form-check-input" type="checkbox" [(ngModel)]="useTribeBonus"
+              name="useTribeBonus" />
             <label class="form-check-label fw-semibold" for="useTribeBonus">
               Use Tribe Rare Mane Bonus
             </label>
           </div>
 
           @if (formType === 'Main') {
-            <fieldset class="border rounded p-3">
-              <legend class="float-none w-auto px-2 fs-6 fw-semibold">
-                Litter size supplement
-              </legend>
-              <div class="row row-cols-1 row-cols-md-2 g-2">
-                @for (item of suppItems; track item) {
-                  <div class="col">
-                    <label
-                      class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
-                    >
-                      <input
-                        class="form-check-input m-0 flex-shrink-0"
-                        type="radio"
-                        name="litterSupps"
-                        [value]="item"
-                        [(ngModel)]="litterSupps"
-                      />
-                      <span class="form-check-label">{{ item }}</span>
-                    </label>
-                  </div>
-                }
-              </div>
-            </fieldset>
-          } @else {
-            <div class="border rounded p-3 mt-3">
-              <div class="form-check mb-2">
-                <input
-                  id="usingRoot"
-                  class="form-check-input"
-                  type="checkbox"
-                  [(ngModel)]="usingRoot"
-                  name="usingRoot"
-                />
-                <label class="form-check-label fw-semibold" for="usingRoot">
-                  Use a fertility root
+          <fieldset class="border rounded p-3">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+              Litter size supplement
+            </legend>
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+              @for (item of suppItems; track item) {
+              <div class="col">
+                <label class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100">
+                  <input class="form-check-input m-0 flex-shrink-0" type="radio" name="litterSupps" [value]="item"
+                    [(ngModel)]="litterSupps" />
+                  <span class="form-check-label">{{ item }}</span>
                 </label>
               </div>
-              @if (usingRoot) {
-                <label for="rootType" class="form-label fw-semibold">
-                  Root item
-                  <span
-                    class="badge ms-1"
-                    [class.text-bg-danger]="!rootType"
-                    [class.text-bg-success]="!!rootType"
-                    >REQUIRED</span
-                  >
-                </label>
-                <select
-                  id="rootType"
-                  class="form-select"
-                  [class.is-invalid]="!rootType"
-                  [(ngModel)]="rootType"
-                  name="rootType"
-                >
-                  <option value="">Choose a root item</option>
-                  @for (item of rootOptions; track item) {
-                    <option [value]="item">{{ item }}</option>
-                  }
-                </select>
               }
             </div>
+          </fieldset>
+          } @else {
+          <div class="border rounded p-3 mt-3">
+            <div class="form-check mb-2">
+              <input id="usingRoot" class="form-check-input" type="checkbox" [(ngModel)]="usingRoot" name="usingRoot" />
+              <label class="form-check-label fw-semibold" for="usingRoot">
+                Use a fertility root
+              </label>
+            </div>
+            @if (usingRoot) {
+            <label for="rootType" class="form-label fw-semibold">
+              Root item
+              <span class="badge ms-1" [class.text-bg-danger]="!rootType"
+                [class.text-bg-success]="!!rootType">REQUIRED</span>
+            </label>
+            <select id="rootType" class="form-select" [class.is-invalid]="!rootType" [(ngModel)]="rootType"
+              name="rootType">
+              <option value="">Choose a root item</option>
+              @for (item of rootOptions; track item) {
+              <option [value]="item">{{ item }}</option>
+              }
+            </select>
+            }
+          </div>
           }
         </div>
       </section>
@@ -375,73 +261,45 @@
       <section class="card bg-light mb-4" aria-label="Extra breeding spot">
         <div class="card-body">
           <div class="form-check mb-2">
-            <input
-              id="useExtraSpot"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="useExtraSpot"
-              name="useExtraSpot"
-            />
+            <input id="useExtraSpot" class="form-check-input" type="checkbox" [(ngModel)]="useExtraSpot"
+              name="useExtraSpot" />
             <label class="form-check-label fw-semibold" for="useExtraSpot">
               Use an extra breeding spot
             </label>
           </div>
           @if (useExtraSpot) {
-            <label for="extraSpot" class="form-label fw-semibold">
-              Extra spot item
-              <span
-                class="badge ms-1"
-                [class.text-bg-danger]="!extraSlot"
-                [class.text-bg-success]="!!extraSlot"
-                >REQUIRED</span
-              >
-            </label>
-            <select
-              id="extraSpot"
-              class="form-select"
-              [class.is-invalid]="!extraSlot"
-              [ngModel]="extraSlot"
-              (ngModelChange)="setExtraSpot($event)"
-              name="extraSpot"
-            >
-              <option value="">Choose an extra spot item</option>
-              @for (item of extraSpotOptions; track item) {
-                <option [value]="item">{{ item }}</option>
-              }
-            </select>
-            @if (extraSlot === talismanExtraSpot) {
-              <fieldset class="border rounded p-3 mt-3">
-                <legend class="float-none w-auto px-2 fs-6 fw-semibold">
-                  Choose one
-                  <span
-                    class="badge ms-1"
-                    [class.text-bg-danger]="!extraSlotChoice"
-                    [class.text-bg-success]="!!extraSlotChoice"
-                  >
-                    REQUIRED
-                  </span>
-                </legend>
-                <div class="btn-group w-100" role="group" aria-label="Talisman extra spot option">
-                  @for (choice of talismanExtraSpotChoices; track choice; let index = $index) {
-                    <input
-                      [id]="'extra-spot-choice-' + index"
-                      class="btn-check"
-                      type="radio"
-                      name="extraSpotChoice"
-                      [value]="choice"
-                      autocomplete="off"
-                      [(ngModel)]="extraSlotChoice"
-                    />
-                    <label
-                      class="btn btn-outline-primary flex-fill"
-                      [for]="'extra-spot-choice-' + index"
-                    >
-                      {{ choice }}
-                    </label>
-                  }
-                </div>
-              </fieldset>
+          <label for="extraSpot" class="form-label fw-semibold">
+            Extra spot item
+            <span class="badge ms-1" [class.text-bg-danger]="!extraSlot"
+              [class.text-bg-success]="!!extraSlot">REQUIRED</span>
+          </label>
+          <select id="extraSpot" class="form-select" [class.is-invalid]="!extraSlot" [ngModel]="extraSlot"
+            (ngModelChange)="setExtraSpot($event)" name="extraSpot">
+            <option value="">Choose an extra spot item</option>
+            @for (item of extraSpotOptions; track item) {
+            <option [value]="item">{{ item }}</option>
             }
+          </select>
+          @if (extraSlot === talismanExtraSpot) {
+          <fieldset class="border rounded p-3 mt-3">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+              Choose one
+              <span class="badge ms-1" [class.text-bg-danger]="!extraSlotChoice"
+                [class.text-bg-success]="!!extraSlotChoice">
+                REQUIRED
+              </span>
+            </legend>
+            <div class="btn-group w-100" role="group" aria-label="Talisman extra spot option">
+              @for (choice of talismanExtraSpotChoices; track choice; let index = $index) {
+              <input [id]="'extra-spot-choice-' + index" class="btn-check" type="radio" name="extraSpotChoice"
+                [value]="choice" autocomplete="off" [(ngModel)]="extraSlotChoice" />
+              <label class="btn btn-outline-primary flex-fill" [for]="'extra-spot-choice-' + index">
+                {{ choice }}
+              </label>
+              }
+            </div>
+          </fieldset>
+          }
           }
         </div>
       </section>
@@ -450,26 +308,19 @@
         <div class="card-body">
           <h2 class="h5 fw-bold mb-3">Build supplements</h2>
           @if (boosterItems.length > 0) {
-            <div class="row row-cols-1 row-cols-md-2 g-2">
-              @for (item of boosterItems.sort(); track item) {
-                <div class="col">
-                  <label
-                    class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
-                    [for]="'booster-' + item"
-                  >
-                    <input
-                      [id]="'booster-' + item"
-                      class="form-check-input m-0 flex-shrink-0"
-                      type="checkbox"
-                      [ngModel]="selectedBoosters.includes(item)"
-                      (ngModelChange)="toggleBooster(item, $event)"
-                      [name]="'booster-' + item"
-                    />
-                    <span class="form-check-label fw-semibold">{{ item }}</span>
-                  </label>
-                </div>
-              }
+          <div class="row row-cols-1 row-cols-md-2 g-2">
+            @for (item of boosterItems.sort(); track item) {
+            <div class="col">
+              <label class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
+                [for]="'booster-' + item">
+                <input [id]="'booster-' + item" class="form-check-input m-0 flex-shrink-0" type="checkbox"
+                  [ngModel]="selectedBoosters.includes(item)" (ngModelChange)="toggleBooster(item, $event)"
+                  [name]="'booster-' + item" />
+                <span class="form-check-label fw-semibold">{{ item }}</span>
+              </label>
             </div>
+            }
+          </div>
           }
         </div>
       </section>
@@ -478,219 +329,237 @@
         <div class="card-body">
           <h2 class="h5 fw-bold mb-3">Other items</h2>
           @for (group of otherGroups; track group.title) {
-            <fieldset class="border rounded bg-white p-3 mb-3">
-              <legend class="float-none w-auto px-2 fs-6 fw-semibold">{{ group.title }}</legend>
-              <div class="row row-cols-1 row-cols-md-2 g-2">
-                @for (item of group.items; track item) {
-                  <div class="col">
-                    <div class="form-check">
-                      <input
-                        [id]="'other-' + item"
-                        class="form-check-input"
-                        type="checkbox"
-                        [ngModel]="selectedOther.includes(item)"
-                        (ngModelChange)="toggleOther(item, $event)"
-                        [name]="'other-' + item"
-                      />
-                      <label class="form-check-label" [for]="'other-' + item">{{ item }}</label>
-                    </div>
-                  </div>
-                }
+          <fieldset class="border rounded bg-white p-3 mb-3">
+            <legend class="float-none w-auto px-2 fs-6 fw-semibold">{{ group.title }}</legend>
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+              @for (item of group.items; track item) {
+              <div class="col">
+                <div class="form-check">
+                  <input [id]="'other-' + item" class="form-check-input" type="checkbox"
+                    [ngModel]="selectedOther.includes(item)" (ngModelChange)="toggleOther(item, $event)"
+                    [name]="'other-' + item" />
+                  <label class="form-check-label" [for]="'other-' + item">{{ item }}</label>
+                </div>
               </div>
-            </fieldset>
+              }
+            </div>
+          </fieldset>
           }
         </div>
       </section>
 
       <section class="card bg-light mb-4" aria-label="Trait items">
-        <div class="card-body">
-          <h2 class="h5 fw-bold mb-2">Using Traits on the Breeding</h2>
-          <p class="form-text">
-            For each selected item, describe its effect and bag size if needed.
-          </p>
-          <div class="row row-cols-1 row-cols-lg-2 g-3">
-            @for (item of traitItems; track item.name) {
-              <div class="col">
-                <div class="border rounded bg-white p-3 h-100">
-                  <div class="form-check mb-2">
+  <div class="card-body">
+    <h2 class="h5 fw-bold mb-2">Using Traits on the Breeding</h2>
+    <p class="form-text">
+      For each selected item, describe its effect and bag size if needed.
+    </p>
+    <div class="row row-cols-1 row-cols-lg-2 g-3">
+      @for (item of traitItems; track item.name) {
+        <div class="col">
+          <div class="border rounded bg-white p-3 h-100">
+            <div class="form-check mb-2">
+              <input
+                [id]="'trait-' + $index"
+                class="form-check-input"
+                type="checkbox"
+                [ngModel]="item.checked"
+                (ngModelChange)="setItemChecked(item, $event)"
+                [name]="'trait-' + $index"
+              />
+              <label class="form-check-label fw-semibold" [for]="'trait-' + $index">
+                {{ item.name }}
+              </label>
+            </div>
+
+            @if (item.checked) {
+              @if (item.name !== 'Blessed Union' && item.name !== 'Devotion to the Spirits') {
+                <fieldset class="mb-2">
+                  <legend class="form-label fs-6 fw-semibold">
+                    Effect direction
+                    <span
+                      class="badge ms-1"
+                      [class.text-bg-danger]="item.increase === null"
+                      [class.text-bg-success]="item.increase !== null"
+                    >
+                      REQUIRED
+                    </span>
+                  </legend>
+                  <div
+                    class="btn-group w-100"
+                    role="group"
+                    [attr.aria-label]="'Effect direction for ' + item.name"
+                  >
                     <input
-                      [id]="'trait-' + $index"
-                      class="form-check-input"
-                      type="checkbox"
-                      [ngModel]="item.checked"
-                      (ngModelChange)="setItemChecked(item, $event)"
-                      [name]="'trait-' + $index"
+                      [id]="'trait-increase-' + $index"
+                      class="btn-check"
+                      type="radio"
+                      [name]="'trait-direction-' + $index"
+                      [value]="true"
+                      autocomplete="off"
+                      [(ngModel)]="item.increase"
                     />
-                    <label class="form-check-label fw-semibold" [for]="'trait-' + $index">
-                      {{ item.name }}
+                    <label
+                      class="btn btn-outline-primary flex-fill"
+                      [for]="'trait-increase-' + $index"
+                    >
+                      Increase
+                    </label>
+                    <input
+                      [id]="'trait-decrease-' + $index"
+                      class="btn-check"
+                      type="radio"
+                      [name]="'trait-direction-' + $index"
+                      [value]="false"
+                      autocomplete="off"
+                      [(ngModel)]="item.increase"
+                    />
+                    <label
+                      class="btn btn-outline-primary flex-fill"
+                      [for]="'trait-decrease-' + $index"
+                    >
+                      Decrease
                     </label>
                   </div>
-                  @if (item.checked) {
-                    @if (item.name !== 'Blessed Union') {
-                      <fieldset class="mb-2">
-                        <legend class="form-label fs-6 fw-semibold">
-                          Effect direction
-                          <span
-                            class="badge ms-1"
-                            [class.text-bg-danger]="item.increase === null"
-                            [class.text-bg-success]="item.increase !== null"
-                            >REQUIRED</span
-                          >
-                        </legend>
-                        <div
-                          class="btn-group w-100"
-                          role="group"
-                          [attr.aria-label]="'Effect direction for ' + item.name"
-                        >
-                          <input
-                            [id]="'trait-increase-' + $index"
-                            class="btn-check"
-                            type="radio"
-                            [name]="'trait-direction-' + $index"
-                            [value]="true"
-                            autocomplete="off"
-                            [(ngModel)]="item.increase"
-                          />
-                          <label
-                            class="btn btn-outline-primary flex-fill"
-                            [for]="'trait-increase-' + $index"
-                            >Increase</label
-                          >
-                          <input
-                            [id]="'trait-decrease-' + $index"
-                            class="btn-check"
-                            type="radio"
-                            [name]="'trait-direction-' + $index"
-                            [value]="false"
-                            autocomplete="off"
-                            [(ngModel)]="item.increase"
-                          />
-                          <label
-                            class="btn btn-outline-primary flex-fill"
-                            [for]="'trait-decrease-' + $index"
-                            >Decrease</label
-                          >
-                        </div>
-                      </fieldset>
-                    }
-                    <label [for]="'trait-target-' + $index" class="form-label">
-                      What does it affect?
-                      <span
-                        class="badge ms-1"
-                        [class.text-bg-danger]="!item.target.trim()"
-                        [class.text-bg-success]="item.target.trim().length > 0"
-                      >
-                        REQUIRED
-                      </span>
+                </fieldset>
+              }
+
+              <label [for]="'trait-target-' + $index" class="form-label">
+                What does it affect?
+                <span
+                  class="badge ms-1"
+                  [class.text-bg-danger]="!item.target.trim()"
+                  [class.text-bg-success]="item.target.trim().length > 0"
+                >
+                  REQUIRED
+                </span>
+              </label>
+
+              @if (item.name === 'Devotion to the Spirits') {
+                <select
+                  [id]="'trait-target-' + $index"
+                  class="form-select mb-2"
+                  [class.is-invalid]="!item.target"
+                  [(ngModel)]="item.target"
+                  [name]="'trait-target-' + $index"
+                >
+                  <option value="">Choose a variant mane present in the breeding</option>
+                  @for (mane of variantManeTypes; track mane) {
+                    <option [value]="mane">{{ mane }}</option>
+                  }
+                </select>
+              } @else {
+                <input
+                  [id]="'trait-target-' + $index"
+                  class="form-control mb-2"
+                  type="text"
+                  [class.is-invalid]="!item.target.trim()"
+                  [(ngModel)]="item.target"
+                  [name]="'trait-target-' + $index"
+                  [placeholder]="item.placeholder"
+                />
+              }
+
+              @if (item.hasBag) {
+                <fieldset class="mb-2">
+                  <legend class="form-label fs-6 fw-semibold">
+                    Sacrificial Bag
+                    <span
+                      class="badge ms-1"
+                      [class.text-bg-danger]="!item.bag"
+                      [class.text-bg-success]="!!item.bag"
+                    >
+                      REQUIRED
+                    </span>
+                  </legend>
+                  <div
+                    class="btn-group w-100"
+                    role="group"
+                    [attr.aria-label]="'Sacrificial bag size for ' + item.name"
+                  >
+                    <input
+                      [id]="'trait-bag-small-' + $index"
+                      class="btn-check"
+                      type="radio"
+                      [name]="'trait-bag-' + $index"
+                      value="Small"
+                      autocomplete="off"
+                      [(ngModel)]="item.bag"
+                    />
+                    <label
+                      class="btn btn-outline-primary flex-fill"
+                      [for]="'trait-bag-small-' + $index"
+                    >
+                      Small
                     </label>
                     <input
-                      [id]="'trait-target-' + $index"
-                      class="form-control mb-2"
-                      type="text"
-                      [class.is-invalid]="!item.target.trim()"
-                      [(ngModel)]="item.target"
-                      [name]="'trait-target-' + $index"
-                      [placeholder]="item.placeholder"
+                      [id]="'trait-bag-large-' + $index"
+                      class="btn-check"
+                      type="radio"
+                      [name]="'trait-bag-' + $index"
+                      value="Large"
+                      autocomplete="off"
+                      [(ngModel)]="item.bag"
                     />
-                    @if (item.hasBag) {
-                      <label [for]="'trait-bag-' + $index" class="form-label">
-                        Sacrificial bag size
-                        <span
-                          class="badge ms-1"
-                          [class.text-bg-danger]="!item.bag"
-                          [class.text-bg-success]="!!item.bag"
-                          >REQUIRED</span
-                        >
-                      </label>
-                      <select
-                        [id]="'trait-bag-' + $index"
-                        class="form-select"
-                        [class.is-invalid]="!item.bag"
-                        [(ngModel)]="item.bag"
-                        [name]="'trait-bag-' + $index"
-                      >
-                        <option value="">Choose bag size</option>
-                        <option value="Small">Small</option>
-                        <option value="Large">Large</option>
-                      </select>
-                    }
-                  }
-                </div>
-              </div>
+                    <label
+                      class="btn btn-outline-primary flex-fill"
+                      [for]="'trait-bag-large-' + $index"
+                    >
+                      Large
+                    </label>
+                  </div>
+                </fieldset>
+              }
             }
           </div>
         </div>
-      </section>
+      }
+    </div>
+  </div>
+</section>
+
+
 
       <section class="card bg-light mb-4" aria-label="Stylist Token">
         <div class="card-body">
           <div class="form-check">
-            <input
-              id="stylistToken"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="stylistToken.checked"
-              name="stylistToken"
-            />
+            <input id="stylistToken" class="form-check-input" type="checkbox" [(ngModel)]="stylistToken.checked"
+              name="stylistToken" />
             <label class="form-check-label fw-semibold" for="stylistToken">Stylist Token</label>
           </div>
           @if (stylistToken.checked) {
-            <div class="mt-2">
-              <label for="stylistTokenTarget" class="form-label">
-                What does it affect?
-                <span
-                  class="badge ms-1"
-                  [class.text-bg-danger]="!stylistToken.target.trim()"
-                  [class.text-bg-success]="stylistToken.target.trim().length > 0"
-                  >REQUIRED</span
-                >
-              </label>
-              <input
-                id="stylistTokenTarget"
-                class="form-control"
-                type="text"
-                [class.is-invalid]="!stylistToken.target.trim()"
-                [(ngModel)]="stylistToken.target"
-                name="stylistTokenTarget"
-                placeholder="Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait"
-              />
-            </div>
+          <div class="mt-2">
+            <label for="stylistTokenTarget" class="form-label">
+              What does it affect?
+              <span class="badge ms-1" [class.text-bg-danger]="!stylistToken.target.trim()"
+                [class.text-bg-success]="stylistToken.target.trim().length > 0">REQUIRED</span>
+            </label>
+            <input id="stylistTokenTarget" class="form-control" type="text"
+              [class.is-invalid]="!stylistToken.target.trim()" [(ngModel)]="stylistToken.target"
+              name="stylistTokenTarget"
+              placeholder="Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait" />
+          </div>
           }
         </div>
       </section>
       <section class="card bg-light mb-4" aria-label="Meelanik Sprite">
         <div class="card-body">
           <div class="form-check">
-            <input
-              id="meelSprite"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="meelSprite.checked"
-              name="meelSprite"
-            />
+            <input id="meelSprite" class="form-check-input" type="checkbox" [(ngModel)]="meelSprite.checked"
+              name="meelSprite" />
             <label class="form-check-label fw-semibold" for="meelSprite">Meelanik Sprite</label>
           </div>
           @if (meelSprite.checked) {
-            <div class="mt-2">
-              <label for="meelSpriteTarget" class="form-label">
-                What does it affect?
-                <span
-                  class="badge ms-1"
-                  [class.text-bg-danger]="!meelSprite.target.trim()"
-                  [class.text-bg-success]="meelSprite.target.trim().length > 0"
-                  >REQUIRED</span
-                >
-              </label>
-              <input
-                id="meelSpriteTarget"
-                class="form-control"
-                type="text"
-                [class.is-invalid]="!meelSprite.target.trim()"
-                [(ngModel)]="meelSprite.target"
-                name="meelSpriteTarget"
-                placeholder="Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait"
-              />
-            </div>
+          <div class="mt-2">
+            <label for="meelSpriteTarget" class="form-label">
+              What does it affect?
+              <span class="badge ms-1" [class.text-bg-danger]="!meelSprite.target.trim()"
+                [class.text-bg-success]="meelSprite.target.trim().length > 0">REQUIRED</span>
+            </label>
+            <input id="meelSpriteTarget" class="form-control" type="text" [class.is-invalid]="!meelSprite.target.trim()"
+              [(ngModel)]="meelSprite.target" name="meelSpriteTarget"
+              placeholder="Enter selected Gene, Mane, Physical Trait, or Non-Physical Trait" />
+          </div>
           }
         </div>
       </section>
@@ -698,47 +567,75 @@
       <section class="card bg-light mb-4" aria-label="Soul Pool Pebble">
         <div class="card-body">
           <div class="form-check">
-            <input
-              id="soulPoolPebble"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="soulPoolPebble.checked"
-              name="soulPoolPebble"
-            />
+            <input id="soulPoolPebble" class="form-check-input" type="checkbox" [(ngModel)]="soulPoolPebble.checked"
+              name="soulPoolPebble" />
             <label class="form-check-label fw-semibold" for="soulPoolPebble">
               Soul Pool Pebble
             </label>
           </div>
           @if (soulPoolPebble.checked) {
-            <div class="mt-2">
-              <label for="soulPoolPebbleTarget" class="form-label fw-semibold">
-                Mane
-                <span
-                  class="badge ms-1"
-                  [class.text-bg-danger]="!soulPoolPebble.target"
-                  [class.text-bg-success]="!!soulPoolPebble.target"
-                  >REQUIRED</span
-                ><br /><small
-                  >Make sure you check the available Manes to Pebble for your pairing from the
-                  Breeding Roller or Mane Calculator!</small
-                >
-              </label>
-              <select
-                id="soulPoolPebbleTarget"
-                class="form-select"
-                [class.is-invalid]="!soulPoolPebble.target"
-                [(ngModel)]="soulPoolPebble.target"
-                name="soulPoolPebbleTarget"
-              >
-                <option value="">Choose a Mane</option>
-                @for (mane of maneTypes; track mane) {
-                  <option [value]="mane">{{ mane }}</option>
-                }
-              </select>
-            </div>
+          <div class="mt-2">
+            <label for="soulPoolPebbleTarget" class="form-label fw-semibold">
+              Mane
+              <span class="badge ms-1" [class.text-bg-danger]="!soulPoolPebble.target"
+                [class.text-bg-success]="!!soulPoolPebble.target">REQUIRED</span><br /><small>Make sure you check the
+                available Manes to Pebble for your pairing from the
+                Breeding Roller or Mane Calculator!</small>
+            </label>
+            <select id="soulPoolPebbleTarget" class="form-select" [class.is-invalid]="!soulPoolPebble.target"
+              [(ngModel)]="soulPoolPebble.target" name="soulPoolPebbleTarget">
+              <option value="">Choose a Mane</option>
+              @for (mane of maneTypes; track mane) {
+              <option [value]="mane">{{ mane }}</option>
+              }
+            </select>
+          </div>
           }
         </div>
       </section>
+
+      <section class="mb-3" aria-labelledby="breeding-roller-link-label">
+        <fieldset class="border rounded p-3 mb-3">
+          <legend id="breeding-roller-link-label" class="float-none w-auto px-2 fs-6 fw-semibold">
+            Breeding Roller
+          </legend>
+          <div class="btn-group w-100" role="group" aria-label="Filled Breeding Roller">
+            <input id="notFilled" class="btn-check" type="radio" name="breedingRollerFilled" [value]="false"
+              autocomplete="off" [(ngModel)]="breedingRollerFilled" />
+            <label class="btn btn-outline-primary flex-fill" for="notFilled">Not Filled</label>
+
+            <input id="filled" class="btn-check" type="radio" name="breedingRollerFilled" [value]="true"
+              autocomplete="off" [(ngModel)]="breedingRollerFilled" />
+            <label class="btn btn-outline-primary flex-fill" for="filled">Filled</label>
+          </div>
+          @if (breedingRollerFilled) {
+          <div class="col-12 mt-3">
+            <label for="breedingRollerLink" class="form-label fw-semibold">
+              Filled Breeding Roller Link
+              <span class="badge ms-1" [class.text-bg-danger]="!breedingRollerLink.trim()"
+                [class.text-bg-success]="breedingRollerLink.trim().length > 0">
+                REQUIRED
+              </span>
+              <br />
+              <small class="fw-normal text-muted">
+                Paste linked text ("Breeding Roller ID Link") or the direct URL from Tokotna<br>
+                Don't worry if you paste and the text below become <code>"https://tokotna.com/breeding/?id=etcetcetc"</code>, its
+                expected.<br>
+                The result will be the usual Breeding Roller ID link text.
+              </small>
+            </label>
+            <textarea id="breedingRollerLink" class="form-control" rows="2" required
+              [class.is-invalid]="!breedingRollerLink.trim()" [(ngModel)]="breedingRollerLink"
+              (paste)="onRollerPaste($event)" name="breedingRollerLink"
+              placeholder="Enter the text with the breeding linked: Breeding Roller ID Link"></textarea>
+          </div>
+          }
+
+        </fieldset>
+
+      </section>
+
+
 
       <div class="d-grid mb-3">
         <button type="button" class="btn btn-primary" (click)="generate()">Generate form</button>
@@ -748,26 +645,18 @@
         <h2 id="breeding-result-label" class="h5 fw-bold">
           {{ title }} - Copy Paste (Check it for possible Errors)
         </h2>
-        <em>All the text in red should be filled manually!</em>
-        <div
-          class="border rounded bg-light p-3 text-break user-select-all"
-          role="region"
-          aria-labelledby="breeding-result-label"
-          tabindex="0"
-          [innerHTML]="result"
-        ></div>
+        <em>All the text in red should be filled manually!
+          And double check the links are working
+        </em>
+        <div class="border rounded bg-light p-3 text-break user-select-all" role="region"
+          aria-labelledby="breeding-result-label" tabindex="0" [innerHTML]="result"></div>
       </section>
 
       <section class="mb-3" aria-labelledby="mass-remove-label">
         <h2 id="mass-remove-label" class="h5 fw-bold">Mass Remove Log</h2>
         <em>Do not include this on your form, its just a test</em>
-        <div
-          class="border rounded bg-light p-3 text-break user-select-all"
-          role="region"
-          aria-labelledby="mass-remove-label"
-          tabindex="0"
-          [innerHTML]="massRemove"
-        ></div>
+        <div class="border rounded bg-light p-3 text-break user-select-all" role="region"
+          aria-labelledby="mass-remove-label" tabindex="0" [innerHTML]="massRemove"></div>
       </section>
       <hr />
       <div class="d-grid">

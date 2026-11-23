@@ -209,3 +209,22 @@ export function createTraitItems(): TraitItem[] {
     },
   ];
 }
+
+export const parentPlaceholder = (role: 'Sire' | 'Dam'): string =>
+  [
+    `${role}: (Link to Tokotna Import page)`,
+    `Owner Approval: (Leave blank if you are the owner)`,
+    `${role}'s Hereditary Mutations/Traits/Breeding Companions:`,
+  ].join('\n');
+
+
+
+export const withBoldLabels = (raw: string): string =>
+  raw
+    // "Dam:", "Sire:" and "Owner approval:" at the start of the line
+    .replace(/^(?:\*\*)?(Sire|Dam|Owner approval)\s*:(?:\*\*)?/gim, '**$1:**')
+    // "Sire's/Dam's Hereditary Mutations/Traits/Breeding Companions:"
+    .replace(
+      /^(?:\*\*)?((?:Sire|Dam)'s Hereditary Mutations\/Traits\/Breeding Companions)\s*:(?:\*\*)?/gim,
+      '**$1:**'
+    );

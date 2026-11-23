@@ -1,10 +1,12 @@
 <header>
-  <nav class="navbar navbar-expand bg-dark navbar-dark" aria-label="Main navigation">
-    <div class="container-lg">
-      <a class="navbar-brand fw-semibold" routerLink="/dcforms">aracollie's Forms Generators</a>
-      <div class="navbar-nav">
+  <nav class="navbar navbar-expand-md bg-dark navbar-dark py-2" aria-label="Main navigation">
+    <div class="container-lg d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+      <a class="navbar-brand fw-semibold m-0" routerLink="/dcforms">
+        aracollie's Forms Generators
+      </a>
+      <div class="navbar-nav flex-row flex-wrap gap-3">
         <a
-          class="nav-link"
+          class="nav-link py-1 px-0"
           routerLink="/dcforms"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
@@ -12,7 +14,7 @@
           >DC Forms</a
         >
         <a
-          class="nav-link"
+          class="nav-link py-1 px-0"
           routerLink="/breeding-forms"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
@@ -21,7 +23,7 @@
       </div>
     </div>
   </nav>
-  <div class="bg-warning text-dark text-center fw-bold py-2" role="alert">
+  <div class="bg-warning text-dark text-center fw-bold py-2 px-3 small" role="alert">
     THIS IS AN UNOFFICIAL TOOL AND MAY HAVE BUGS; DOUBLE CHECK THE RESULTS
   </div>
 </header>
