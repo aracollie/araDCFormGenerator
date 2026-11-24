@@ -249,7 +249,13 @@
               name="rootType">
               <option value="">Choose a root item</option>
               @for (item of rootOptions; track item) {
-              <option [value]="item">{{ item }}</option>
+              <option [value]="item">{{ item }}
+                @if(hasTraitCompanion(choice)){
+                <span class="badge ms-1 text-bg-alert">
+                  NOT PRESENT IN THE BREEDING
+                </span>
+                }
+              </option>
               }
             </select>
             }
@@ -295,6 +301,11 @@
                 [value]="choice" autocomplete="off" [(ngModel)]="extraSlotChoice" />
               <label class="btn btn-outline-primary flex-fill" [for]="'extra-spot-choice-' + index">
                 {{ choice }}
+                @if(hasTraitCompanion(choice)){
+                <span class="badge ms-1 text-bg-alert">
+                  NOT PRESENT IN THE BREEDING
+                </span>
+                }
               </label>
               }
             </div>
@@ -356,6 +367,7 @@
     </p>
     <div class="row row-cols-1 row-cols-lg-2 g-3">
       @for (item of traitItems; track item.name) {
+         @if(hasTraitCompanion(item.name)){
         <div class="col">
           <div class="border rounded bg-white p-3 h-100">
             <div class="form-check mb-2">
@@ -373,7 +385,7 @@
             </div>
 
             @if (item.checked) {
-              @if (item.name !== 'Blessed Union' && item.name !== 'Devotion to the Spirits') {
+              @if (item.increase != null) {
                 <fieldset class="mb-2">
                   <legend class="form-label fs-6 fw-semibold">
                     Effect direction
@@ -512,7 +524,7 @@
               }
             }
           </div>
-        </div>
+        </div>}
       }
     </div>
   </div>
@@ -542,6 +554,7 @@
           }
         </div>
       </section>
+      @if(hasTraitCompanion('Meelanik Sprite')){
       <section class="card bg-light mb-4" aria-label="Meelanik Sprite">
         <div class="card-body">
           <div class="form-check">
@@ -563,6 +576,7 @@
           }
         </div>
       </section>
+      }
 
       <section class="card bg-light mb-4" aria-label="Soul Pool Pebble">
         <div class="card-body">

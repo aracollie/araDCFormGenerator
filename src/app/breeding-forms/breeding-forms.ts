@@ -58,7 +58,13 @@ export class BreedingForms {
   protected damBlock = '';
   breedingRollerFilled = false;
   breedingRollerLink = '';
+  
+  // Header title -> Main/Started Thread Breeding Request Form
+  protected get title(): string {
+    return this.formType + ' Thread Breeding Request Form';
+  }
 
+  // Make the roller link pasted become html to be handled later
   onRollerPaste(event: ClipboardEvent): void {
     const html = event.clipboardData?.getData('text/html');
     if (html) {
@@ -71,6 +77,7 @@ export class BreedingForms {
     }
   }
 
+  // Make the text on Sire and Dam lines become html to be handled later
   onParentPaste(event: ClipboardEvent, role: 'sire' | 'dam'): void {
     const html = event.clipboardData?.getData('text/html');
     if (!html) return;
@@ -126,16 +133,12 @@ export class BreedingForms {
   }
 
 
-
-
-
-  protected get title(): string {
-    return this.formType + ' Thread Breeding Request Form';
-  }
-
+  // All supps options for starters
   protected get rootOptions(): string[] {
     return [...ROOT_TYPES, AGA_SPRITE];
   }
+
+   // All supps options for main (changes depending the parents)
   protected get suppItems(): string[] {
     const rule = SUPP_RULES.find((r) =>
       r.builds.some((b) => b === this.sireBuild || b === this.damBuild),
@@ -143,6 +146,7 @@ export class BreedingForms {
     return [...(rule?.items ?? DEFAULT_SUPP_ITEMS), AGA_SPRITE];
   }
 
+  // Booster items for Sire + Dam and Tokota unless Akota x Dire
   protected get boosterItems(): string[] {
     const items = new Set<string>();
     // Booster of each parent's build (skips the empty '' state)
@@ -159,13 +163,38 @@ export class BreedingForms {
     return [...items];
   }
 
-  protected get extraSpotOptions(): string[] {
+  // Extra Slot Options for the dropdown
+  protected get extraSlotOptions(): string[] {
     return EXTRA_SLOT_OPTIONS[this.formType];
   }
 
+  // a and b are breedeable?
   canPair(a: Build | '', b: Build | ''): boolean {
     if (!a || !b) return true;
     return COMPATIBLE[a].includes(b);
+  }
+
+  // If both blocks are filled check if they have the trait or companion
+  hasTraitCompanion(item: string): boolean {
+    if (this.sireBlock.trim() || this.damBlock.trim()) return true;
+    else{
+      if(item in CONSUMABLE_ROOTS ||  item.includes('Totem') ||  item.includes('Root')){
+        return true;
+      }
+      else if(){
+        for(supp in SUPP_RULES){
+          if(item === this.suppItems.items[3]){
+            return true;
+          }
+        }
+      }
+      else if(this.sireBlock.includes(item) || this.sireBlock.includes(item)){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
   }
 
   setSire(s: Build | '') {
@@ -182,17 +211,27 @@ export class BreedingForms {
     this.extraSlotChoice = '';
   }
 
+  // Clear builds - Mostly if you are stuck with Akotas
   resetBuilds(): void {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
     this.cleanSelections();
   }
+  
 
   private cleanSelections(): void {
     if (!this.canPair(this.sireBuild, this.damBuild)) this.damBuild = '';
     if (!this.suppItems.includes(this.litterSupps)) this.litterSupps = '';
     this.selectedBoosters = this.selectedBoosters.filter((b) => this.boosterItems.includes(b));
   }
+
+    // Does not allow spaces on usernames
+  private cleanUsername(input: HTMLInputElement): string {
+    const clean = input.value.replace(/\s/g, '');
+    input.value = clean;
+    return clean;
+  }
+
 
   setFormType(value: FormType) {
     if (value === 'Main') {
@@ -217,11 +256,6 @@ export class BreedingForms {
     this.litterMode = value;
   }
 
-  private cleanUsername(input: HTMLInputElement): string {
-    const clean = input.value.replace(/\s/g, '');
-    input.value = clean;
-    return clean;
-  }
 
   setUsername(input: HTMLInputElement): void {
     this.username = this.cleanUsername(input);
@@ -235,12 +269,7 @@ export class BreedingForms {
     this.inbreeding = checked;
     if (!checked) this.lastLineInbreeding = false;
   }
-  toggleBooster(name: string, checked: boolean) {
-    this.selectedBoosters = toggleIn(this.selectedBoosters, name, checked);
-  }
-  toggleOther(name: string, checked: boolean) {
-    this.selectedOther = toggleIn(this.selectedOther, name, checked);
-  }
+
 
   setItemChecked(item: TraitItem, checked: boolean) {
     item.checked = checked;
@@ -252,6 +281,14 @@ export class BreedingForms {
     item.target = '';
   }
   }
+
+  toggleBooster(name: string, checked: boolean) {
+    this.selectedBoosters = toggleIn(this.selectedBoosters, name, checked);
+  }
+  toggleOther(name: string, checked: boolean) {
+    this.selectedOther = toggleIn(this.selectedOther, name, checked);
+  }
+
   clearForm() {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
