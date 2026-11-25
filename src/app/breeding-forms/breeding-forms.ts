@@ -58,7 +58,7 @@ export class BreedingForms {
   protected damBlock = '';
   breedingRollerFilled = false;
   breedingRollerLink = '';
-  
+
   // Header title -> Main/Started Thread Breeding Request Form
   protected get title(): string {
     return this.formType + ' Thread Breeding Request Form';
@@ -176,24 +176,19 @@ export class BreedingForms {
 
   // If both blocks are filled check if they have the trait or companion
   hasTraitCompanion(item: string): boolean {
-    if (this.sireBlock.trim() || this.damBlock.trim()) return true;
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return true;
     else{
-      if(item in CONSUMABLE_ROOTS ||  item.includes('Totem') ||  item.includes('Root')){
+      var itemlc = item.toLowerCase();
+      const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
+      if (
+        CONSUMABLE_ROOTS.includes(itemlc) ||
+        itemlc.includes('totem') ||
+        itemlc.includes('root') ||
+        this.suppItems.includes(itemlc)
+      ) {
         return true;
       }
-      else if(){
-        for(supp in SUPP_RULES){
-          if(item === this.suppItems.items[3]){
-            return true;
-          }
-        }
-      }
-      else if(this.sireBlock.includes(item) || this.sireBlock.includes(item)){
-        return true;
-      }
-      else{
-        return false;
-      }
+      return combinedBlocks.includes(itemlc);
     }
   }
 
@@ -217,7 +212,7 @@ export class BreedingForms {
     this.damBuild = 'Tokota';
     this.cleanSelections();
   }
-  
+
 
   private cleanSelections(): void {
     if (!this.canPair(this.sireBuild, this.damBuild)) this.damBuild = '';
