@@ -29,7 +29,7 @@ export class BreedingForms {
   protected damBuild: Build | '' = 'Tokota';
   formType: FormType = 'Main';
   username = '';
-  faction = 'Neutral';
+  faction = '';
   protected litterMode: LitterMode = 'full';
   protected potlTo: PotlTo | '' = '';
   splitPartner = '';
@@ -38,13 +38,15 @@ export class BreedingForms {
   rollInjuries = false;
   useTribeBonus = false;
   useExtraSpot = false;
+  usingSupps = false;
+  usingRoot = false;
+
   protected litterSupps = '';
   protected rootType = '';
   protected extraSlot = '';
   protected extraSlotChoice = '';
   protected readonly talismanExtraSpot = TALISMAN_EXTRA_SLOT;
   protected readonly talismanExtraSpotChoices = TALISMAN_EXTRA_SLOT_CHOICES;
-  usingRoot = false;
   protected selectedBoosters: string[] = [];
   protected selectedOther: string[] = [];
   protected traitItems: TraitItem[] = createTraitItems();
@@ -59,6 +61,12 @@ export class BreedingForms {
   breedingRollerFilled = false;
   breedingRollerLink = '';
 
+  // Header title -> Main/Started Thread Breeding Request Form
+  protected get title(): string {
+    return this.formType + ' Thread Breeding Request Form';
+  }
+
+  // Make the roller link pasted become html to be handled later
   onRollerPaste(event: ClipboardEvent): void {
     const html = event.clipboardData?.getData('text/html');
     if (html) {
@@ -71,6 +79,7 @@ export class BreedingForms {
     }
   }
 
+  // Make the text on Sire and Dam lines become html to be handled later
   onParentPaste(event: ClipboardEvent, role: 'sire' | 'dam'): void {
     const html = event.clipboardData?.getData('text/html');
     if (!html) return;
@@ -125,17 +134,12 @@ export class BreedingForms {
     }
   }
 
-
-
-
-
-  protected get title(): string {
-    return this.formType + ' Thread Breeding Request Form';
-  }
-
+  // All supps options for starters
   protected get rootOptions(): string[] {
     return [...ROOT_TYPES, AGA_SPRITE];
   }
+
+  // All supps options for main (changes depending the parents)
   protected get suppItems(): string[] {
     const rule = SUPP_RULES.find((r) =>
       r.builds.some((b) => b === this.sireBuild || b === this.damBuild),
@@ -143,6 +147,7 @@ export class BreedingForms {
     return [...(rule?.items ?? DEFAULT_SUPP_ITEMS), AGA_SPRITE];
   }
 
+  // Booster items for Sire + Dam and Tokota unless Akota x Dire
   protected get boosterItems(): string[] {
     const items = new Set<string>();
     // Booster of each parent's build (skips the empty '' state)
@@ -159,13 +164,61 @@ export class BreedingForms {
     return [...items];
   }
 
-  protected get extraSpotOptions(): string[] {
+  // Extra Slot Options for the dropdown
+  protected get extraSlotOptions(): string[] {
     return EXTRA_SLOT_OPTIONS[this.formType];
   }
 
+  // a and b are breedeable?
   canPair(a: Build | '', b: Build | ''): boolean {
     if (!a || !b) return true;
     return COMPATIBLE[a].includes(b);
+  }
+
+  // If both blocks are filled check if they have the trait or companion
+  hasTraitCompanion(item: string): boolean {
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return true;
+    else {
+      var itemlc = item.toLowerCase();
+      const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
+      if (
+        CONSUMABLE_ROOTS.some((root) => itemlc.includes(root.toLowerCase())) ||
+        itemlc.includes('totem') ||
+        itemlc.includes('supplements') ||
+        itemlc.includes('image') ||
+        itemlc.includes('root') ||
+        itemlc.includes('talisman') ||
+        this.suppItems.includes(itemlc)
+      ) {
+        return true;
+      }
+      if (itemlc === 'shikoku + shiba') {
+        if (
+          (this.sireBlock.includes('shiba') && this.sireBlock.includes('shikoku')) ||
+          (this.damBlock.includes('shiba') && this.damBlock.includes('shikoku'))
+        ) {
+          return true;
+        }
+      }
+      return combinedBlocks.includes(itemlc);
+    }
+  }
+
+  // If there is a gender trait present shows a flag (kings blood, queens blood)
+  genderTrait(trait: string): boolean {
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return false;
+    else{
+      const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
+      return combinedBlocks.includes(trait);
+    }
+  }
+
+  // Returns true if the barghest companion is in either parents
+  boostedByBarghest(): boolean {
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return false;
+    else {
+      return this.hasTraitCompanion('barghest');
+    }
   }
 
   setSire(s: Build | '') {
@@ -177,11 +230,21 @@ export class BreedingForms {
     this.cleanSelections();
   }
 
+  // Line of sire must start with Sire:
+  get isSireInvalid(): boolean {
+    return !!this.sireBlock.trim() && !/^\s*Sire\s*:/i.test(this.sireBlock);
+  }
+
+  get isDamInvalid(): boolean {
+    return !!this.damBlock.trim() && !/^\s*Dam\s*:/i.test(this.damBlock);
+  }
+
   setExtraSpot(value: string): void {
     this.extraSlot = value;
     this.extraSlotChoice = '';
   }
 
+  // Clear builds - Mostly if you are stuck with Akotas
   resetBuilds(): void {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
@@ -192,6 +255,13 @@ export class BreedingForms {
     if (!this.canPair(this.sireBuild, this.damBuild)) this.damBuild = '';
     if (!this.suppItems.includes(this.litterSupps)) this.litterSupps = '';
     this.selectedBoosters = this.selectedBoosters.filter((b) => this.boosterItems.includes(b));
+  }
+
+  // Does not allow spaces on usernames
+  private cleanUsername(input: HTMLInputElement): string {
+    const clean = input.value.replace(/\s/g, '');
+    input.value = clean;
+    return clean;
   }
 
   setFormType(value: FormType) {
@@ -217,12 +287,6 @@ export class BreedingForms {
     this.litterMode = value;
   }
 
-  private cleanUsername(input: HTMLInputElement): string {
-    const clean = input.value.replace(/\s/g, '');
-    input.value = clean;
-    return clean;
-  }
-
   setUsername(input: HTMLInputElement): void {
     this.username = this.cleanUsername(input);
   }
@@ -235,6 +299,18 @@ export class BreedingForms {
     this.inbreeding = checked;
     if (!checked) this.lastLineInbreeding = false;
   }
+
+  setItemChecked(item: TraitItem, checked: boolean) {
+    item.checked = checked;
+    if (checked && item.name === 'Devotion to the Spirits') {
+      item.increase = true;
+    } else if (!checked) {
+      item.bag = '';
+      item.increase = null;
+      item.target = '';
+    }
+  }
+
   toggleBooster(name: string, checked: boolean) {
     this.selectedBoosters = toggleIn(this.selectedBoosters, name, checked);
   }
@@ -242,21 +318,11 @@ export class BreedingForms {
     this.selectedOther = toggleIn(this.selectedOther, name, checked);
   }
 
-  setItemChecked(item: TraitItem, checked: boolean) {
-    item.checked = checked;
-  if (checked && item.name === 'Devotion to the Spirits') {
-    item.increase = true;
-  } else if (!checked) {
-    item.bag = '';
-    item.increase = null;
-    item.target = '';
-  }
-  }
   clearForm() {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
     this.username = '';
-    this.faction = 'Neutral';
+    this.faction = '';
     this.litterMode = 'full';
     this.potlTo = '';
     this.splitPartner = '';
@@ -280,7 +346,6 @@ export class BreedingForms {
     this.meelSprite = { checked: false, target: '' };
     this.breedingRollerFilled = false;
     this.breedingRollerLink = '';
-
   }
 
   generate() {
@@ -379,7 +444,6 @@ export class BreedingForms {
       errors.push('Enter the Filled Breeding Roller ID Link.');
     }
 
-
     if (errors.length > 0) {
       this.massRemove = '';
       this.result = `Please fix all the following errors before generating the form:<ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`;
@@ -445,7 +509,6 @@ export class BreedingForms {
       ? formatParentBlock(this.damBlock.trim(), 'Dam')
       : formatParentBlock(parentPlaceholder('Dam'), 'Dam', true);
 
-
     const firstPart = [
       ...sireLines,
       `**.**`,
@@ -505,7 +568,7 @@ export class BreedingForms {
       `**.**`,
       `**Using Extra Breeding Spot?** ${extraSlotLine}`,
       `**.**`,
-      filledBreedingRollerLine
+      filledBreedingRollerLine,
     ];
 
     const profile = [...firstPart, ...middlePart, ...lastPart].join('\n');
