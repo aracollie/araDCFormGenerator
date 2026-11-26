@@ -126,17 +126,24 @@
                 this is expected!
               </span>
             </label>
-
+        
             <textarea
               id="sireBlock"
               class="form-control"
+              [class.is-invalid]="isSireInvalid"
               rows="4"
               required
               [(ngModel)]="sireBlock"
               (paste)="onParentPaste($event, 'sire')"
               [placeholder]="parentPlaceholder('Sire')"
             ></textarea>
+            @if (isSireInvalid) {
+              <span class="badge ms-1 text-bg-danger text-wrap text-start">
+                The Sire Box must start with "Sire:"
+              </span>
+            }
           </div>
+        
           <div class="col-12 col-md-6">
             <label for="damBlock" class="form-label fw-semibold">
               Dam Block<br />
@@ -146,17 +153,25 @@
                 this is expected!
               </span>
             </label>
+        
             <textarea
               id="damBlock"
               class="form-control"
+              [class.is-invalid]="isDamInvalid"
               rows="4"
               required
               [(ngModel)]="damBlock"
               (paste)="onParentPaste($event, 'dam')"
               [placeholder]="parentPlaceholder('Dam')"
             ></textarea>
+            @if (isDamInvalid) {
+              <span class="badge ms-1 text-bg-danger text-wrap text-start">
+                The Dam Box must start with "Dam:"
+              </span>
+            }
           </div>
         </div>
+        
       </div>
 
       @if (sireBuild && damBuild && !canPair(sireBuild, damBuild)) {
@@ -190,8 +205,16 @@
           <div class="form-text">Usernames cannot contain spaces.</div>
         </div>
         <div class="col-12 col-md-6">
-          <label for="faction" class="form-label fw-semibold">Faction</label>
+          <label for="faction" class="form-label fw-semibold">Faction
+            <span
+                    class="badge ms-1"
+                    [class.text-bg-danger]="!faction"
+                    [class.text-bg-success]="!!faction"
+                    >REQUIRED</span
+                  >
+          </label>
           <select id="faction" class="form-select" [(ngModel)]="faction" name="faction">
+            <option value="">Choose a faction</option>
             @for (item of factions; track item) {
               <option [value]="item">{{ item }}</option>
             }
@@ -349,22 +372,166 @@
           </div>
 
           @if (formType === 'Main') {
-            <fieldset class="border rounded p-3">
+            <div class="border rounded p-3 mt-3">
+              <div class="form-check">
+                <input
+                  id="usingSupps"
+                  class="form-check-input"
+                  type="checkbox"
+                  [(ngModel)]="usingSupps"
+                  (ngModelChange)="!$event && (litterSupps = '')"
+                  name="usingSupps"
+                />
+                <label class="form-check-label fw-semibold" for="usingSupps">
+                  Use fertility supplements
+                </label>
+              </div>
+          
+              @if (usingSupps) {
+                <fieldset class="border rounded p-3 mt-3">
+                  <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+                    Litter size supplement
+                    <span
+                      class="badge ms-1"
+                      [class.text-bg-danger]="!litterSupps"
+                      [class.text-bg-success]="!!litterSupps"
+                    >
+                      REQUIRED
+                    </span>
+                  </legend>
+                  <div class="row row-cols-1 row-cols-md-2 g-2">
+                    @for (item of suppItems; track item) {
+                      <div class="col">
+                        <label
+                          class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
+                        >
+                          <input
+                            class="form-check-input m-0 flex-shrink-0"
+                            type="radio"
+                            name="litterSupps"
+                            [value]="item"
+                            [(ngModel)]="litterSupps"
+                          />
+                          <span class="form-check-label">
+                            {{ item }}
+                            @if (!hasTraitCompanion(item)) {
+                              <span class="badge ms-1 text-bg-warning text-wrap text-start">
+                                NOT INCLUDED IN THE BREEDING
+                              </span>
+                            }
+                          </span>
+                        </label>
+                      </div>
+                    }
+                  </div>
+                </fieldset>
+              }
+            </div>
+          } @else {
+            <div class="border rounded p-3 mt-3">
+              <div class="form-check">
+                <input
+                  id="usingRoot"
+                  class="form-check-input"
+                  type="checkbox"
+                  [(ngModel)]="usingRoot"
+                  (ngModelChange)="!$event && (rootType = '')"
+                  name="usingRoot"
+                />
+                <label class="form-check-label fw-semibold" for="usingRoot">
+                  Use a fertility root
+                </label>
+              </div>
+          
+              @if (usingRoot) {
+                <fieldset class="border rounded p-3 mt-3">
+                  <legend class="float-none w-auto px-2 fs-6 fw-semibold">
+                    Root item
+                    <span
+                      class="badge ms-1"
+                      [class.text-bg-danger]="!rootType"
+                      [class.text-bg-success]="!!rootType"
+                    >
+                      REQUIRED
+                    </span>
+                  </legend>
+                  <div class="row row-cols-1 row-cols-md-2 g-2">
+                    @for (item of rootOptions; track item) {
+                      <div class="col">
+                        <label
+                          class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
+                        >
+                          <input
+                            class="form-check-input m-0 flex-shrink-0"
+                            type="radio"
+                            name="rootType"
+                            [value]="item"
+                            [(ngModel)]="rootType"
+                          />
+                          <span class="form-check-label">
+                            {{ item }}
+                            @if (!hasTraitCompanion(item)) {
+                              <span class="badge ms-1 text-bg-warning text-wrap text-start">
+                                NOT INCLUDED IN THE BREEDING
+                              </span>
+                            }
+                          </span>
+                        </label>
+                      </div>
+                    }
+                  </div>
+                </fieldset>
+              }
+            </div>
+          }
+          
+        </div>
+      </section>
+
+      <section class="card bg-light mb-4" aria-label="Extra breeding spot">
+        <div class="card-body">
+          <div class="form-check">
+            <input
+              id="useExtraSpot"
+              class="form-check-input"
+              type="checkbox"
+              [(ngModel)]="useExtraSpot"
+              (ngModelChange)="!$event && setExtraSpot('')"
+              name="useExtraSpot"
+            />
+            <label class="form-check-label fw-semibold" for="useExtraSpot">
+              Use an extra breeding spot
+            </label>
+          </div>
+      
+          @if (useExtraSpot) {
+            <fieldset class="border rounded p-3 mt-3">
               <legend class="float-none w-auto px-2 fs-6 fw-semibold">
-                Litter size supplement
+                Extra spot item
+                <span
+                  class="badge ms-1"
+                  [class.text-bg-danger]="!extraSlot"
+                  [class.text-bg-success]="!!extraSlot"
+                >
+                  REQUIRED
+                </span>
               </legend>
+      
               <div class="row row-cols-1 row-cols-md-2 g-2">
-                @for (item of suppItems; track item) {
+                @for (item of extraSlotOptions; track item; let i = $index) {
                   <div class="col">
                     <label
                       class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
+                      [for]="'extra-spot-' + i"
                     >
                       <input
+                        [id]="'extra-spot-' + i"
                         class="form-check-input m-0 flex-shrink-0"
                         type="radio"
-                        name="litterSupps"
+                        name="extraSpot"
                         [value]="item"
-                        [(ngModel)]="litterSupps"
+                        [ngModel]="extraSlot"
+                        (ngModelChange)="setExtraSpot($event)"
                       />
                       <span class="form-check-label">{{ item }}</span>
                     </label>
@@ -372,88 +539,7 @@
                 }
               </div>
             </fieldset>
-          } @else {
-            <div class="border rounded p-3 mt-3">
-              <div class="form-check mb-2">
-                <input
-                  id="usingRoot"
-                  class="form-check-input"
-                  type="checkbox"
-                  [(ngModel)]="usingRoot"
-                  name="usingRoot"
-                />
-                <label class="form-check-label fw-semibold" for="usingRoot">
-                  Use a fertility root
-                </label>
-              </div>
-              @if (usingRoot) {
-                <label for="rootType" class="form-label fw-semibold">
-                  Root item
-                  <span
-                    class="badge ms-1"
-                    [class.text-bg-danger]="!rootType"
-                    [class.text-bg-success]="!!rootType"
-                    >REQUIRED</span
-                  >
-                </label>
-                <select
-                  id="rootType"
-                  class="form-select"
-                  [class.is-invalid]="!rootType"
-                  [(ngModel)]="rootType"
-                  name="rootType"
-                >
-                  <option value="">Choose a root item</option>
-                  @for (item of rootOptions; track item) {
-                    <option [value]="item">
-                      {{ item
-                      }}{{ !hasTraitCompanion(item) ? ' — NOT PRESENT IN THE BREEDING' : '' }}
-                    </option>
-                  }
-                </select>
-              }
-            </div>
-          }
-        </div>
-      </section>
-
-      <section class="card bg-light mb-4" aria-label="Extra breeding spot">
-        <div class="card-body">
-          <div class="form-check mb-2">
-            <input
-              id="useExtraSpot"
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="useExtraSpot"
-              name="useExtraSpot"
-            />
-            <label class="form-check-label fw-semibold" for="useExtraSpot">
-              Use an extra breeding spot
-            </label>
-          </div>
-          @if (useExtraSpot) {
-            <label for="extraSpot" class="form-label fw-semibold">
-              Extra spot item
-              <span
-                class="badge ms-1"
-                [class.text-bg-danger]="!extraSlot"
-                [class.text-bg-success]="!!extraSlot"
-                >REQUIRED</span
-              >
-            </label>
-            <select
-              id="extraSpot"
-              class="form-select"
-              [class.is-invalid]="!extraSlot"
-              [ngModel]="extraSlot"
-              (ngModelChange)="setExtraSpot($event)"
-              name="extraSpot"
-            >
-              <option value="">Choose an extra spot item</option>
-              @for (item of extraSlotOptions; track item) {
-                <option [value]="item">{{ item }}</option>
-              }
-            </select>
+      
             @if (extraSlot === talismanExtraSpot) {
               <fieldset class="border rounded p-3 mt-3">
                 <legend class="float-none w-auto px-2 fs-6 fw-semibold">
@@ -466,25 +552,32 @@
                     REQUIRED
                   </span>
                 </legend>
-                <div class="btn-group w-100" role="group" aria-label="Talisman extra spot option">
+      
+                <div class="row row-cols-1 row-cols-md-2 g-2">
                   @for (choice of talismanExtraSpotChoices; track choice; let index = $index) {
-                    <input
-                      [id]="'extra-spot-choice-' + index"
-                      class="btn-check"
-                      type="radio"
-                      name="extraSpotChoice"
-                      [value]="choice"
-                      autocomplete="off"
-                      [(ngModel)]="extraSlotChoice"
-                    />
-                    <label class="btn btn-outline-primary flex-fill" [for]="'extra-spot-choice-' + index">
-  {{ choice }}
-  @if (!hasTraitCompanion(choice)) {
-    <span class="badge ms-1 text-bg-warning">
-      NOT PRESENT IN THE BREEDING
-    </span>
-  }
-</label>
+                    <div class="col">
+                      <label
+                        class="border rounded bg-white p-2 d-flex align-items-center gap-2 h-100"
+                        [for]="'extra-spot-choice-' + index"
+                      >
+                        <input
+                          [id]="'extra-spot-choice-' + index"
+                          class="form-check-input m-0 flex-shrink-0"
+                          type="radio"
+                          name="extraSpotChoice"
+                          [value]="choice"
+                          [(ngModel)]="extraSlotChoice"
+                        />
+                        <span class="form-check-label">
+                          {{ choice }}
+                          @if (!hasTraitCompanion(choice)) {
+                            <span class="badge ms-1 text-bg-warning text-wrap text-start">
+                              NOT PRESENT IN THE BREEDING
+                            </span>
+                          }
+                        </span>
+                      </label>
+                    </div>
                   }
                 </div>
               </fieldset>
@@ -492,10 +585,18 @@
           }
         </div>
       </section>
+      
 
       <section class="card bg-light mb-4" aria-label="Build supplements">
         <div class="card-body">
-          <h2 class="h5 fw-bold mb-3">Build supplements</h2>
+          <h2 class="h5 fw-bold mb-3">Build Boosters</h2>
+          
+          @if(boostedByBarghest()){
+            <span class="badge d-block w-100 mb-2 text-bg-success">
+              BOOSTED BY BARGHEST
+            </span>
+          }
+          
           @if (boosterItems.length > 0) {
             <div class="row row-cols-1 row-cols-md-2 g-2">
               @for (item of boosterItems.sort(); track item) {
@@ -528,6 +629,23 @@
             <fieldset class="border rounded bg-white p-3 mb-3">
               <legend class="float-none w-auto px-2 fs-6 fw-semibold">{{ group.title }}</legend>
               <div class="row row-cols-1 row-cols-md-2 g-2">
+                @if (group.title.toLowerCase().includes('marking') && boostedByBarghest()) {
+                  <span class="badge ms-1 text-bg-success text-wrap text-start">
+                    BOOSTED BY BARGHEST
+                  </span>
+                } @else if (group.title.toLowerCase().includes('gender')) {
+                  @if (!hasTraitCompanion('queens')) {
+                    <span class="badge ms-1 text-bg-warning text-wrap text-center">
+                      TOKO ALREADY HAS QUEENS BLOOD<br>ALL PUPS WILL BE BORN FEMALE
+                    </span>
+                  }
+                  @if (!hasTraitCompanion('kings')) {
+                    <span class="badge ms-1 text-bg-warning text-wrap text-center">
+                      TOKO ALREADY HAS KINGS BLOOD<br>ALL PUPS WILL BE BORN MALE
+                    </span>
+                  }
+                }
+                
                 @for (item of group.items; track item) {
                   <div class="col">
                     <div class="form-check">
@@ -557,7 +675,6 @@
           </p>
           <div class="row row-cols-1 row-cols-lg-2 g-3">
             @for (item of traitItems; track item.name) {
-              @if (!hasTraitCompanion(item.name)) {
                 <div class="col">
                   <div class="border rounded bg-white p-3 h-100">
                     <div class="form-check mb-2">
@@ -720,7 +837,7 @@
                   </div>
                 </div>
               }
-            }
+            
           </div>
         </div>
       </section>
@@ -735,7 +852,13 @@
               [(ngModel)]="stylistToken.checked"
               name="stylistToken"
             />
-            <label class="form-check-label fw-semibold" for="stylistToken">Stylist Token</label>
+            <label class="form-check-label fw-semibold" for="stylistToken">Stylist Token
+              @if(boostedByBarghest()){
+              <span class="badge ms-1 text-bg-success">
+                BOOSTED BY BARGHEST
+              </span>
+            }
+            </label>
           </div>
           @if (stylistToken.checked) {
             <div class="mt-2">
