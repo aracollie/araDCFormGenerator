@@ -134,13 +134,12 @@ export class BreedingForms {
     }
   }
 
-
   // All supps options for starters
   protected get rootOptions(): string[] {
     return [...ROOT_TYPES, AGA_SPRITE];
   }
 
-   // All supps options for main (changes depending the parents)
+  // All supps options for main (changes depending the parents)
   protected get suppItems(): string[] {
     const rule = SUPP_RULES.find((r) =>
       r.builds.some((b) => b === this.sireBuild || b === this.damBuild),
@@ -179,12 +178,11 @@ export class BreedingForms {
   // If both blocks are filled check if they have the trait or companion
   hasTraitCompanion(item: string): boolean {
     if (!this.sireBlock.trim() || !this.damBlock.trim()) return true;
-    else{
+    else {
       var itemlc = item.toLowerCase();
       const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
       if (
-        CONSUMABLE_ROOTS.some(root => itemlc.includes(root.toLowerCase()))
- ||
+        CONSUMABLE_ROOTS.some((root) => itemlc.includes(root.toLowerCase())) ||
         itemlc.includes('totem') ||
         itemlc.includes('supplements') ||
         itemlc.includes('image') ||
@@ -194,20 +192,31 @@ export class BreedingForms {
       ) {
         return true;
       }
-      if(itemlc === "shikoku + shiba"){
-        if((this.sireBlock.includes("shiba") && this.sireBlock.includes("shikoku"))||
-          (this.damBlock.includes("shiba") && this.damBlock.includes("shikoku"))
-        ){
-          return true
+      if (itemlc === 'shikoku + shiba') {
+        if (
+          (this.sireBlock.includes('shiba') && this.sireBlock.includes('shikoku')) ||
+          (this.damBlock.includes('shiba') && this.damBlock.includes('shikoku'))
+        ) {
+          return true;
         }
       }
       return combinedBlocks.includes(itemlc);
     }
   }
 
-  boostedByBarghest() : boolean{
+  // If there is a gender trait present shows a flag (kings blood, queens blood)
+  genderTrait(trait: string): boolean {
     if (!this.sireBlock.trim() || !this.damBlock.trim()) return false;
     else{
+      const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
+      return combinedBlocks.includes(trait);
+    }
+  }
+
+  // Returns true if the barghest companion is in either parents
+  boostedByBarghest(): boolean {
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return false;
+    else {
       return this.hasTraitCompanion('barghest');
     }
   }
@@ -221,14 +230,14 @@ export class BreedingForms {
     this.cleanSelections();
   }
 
+  // Line of sire must start with Sire:
   get isSireInvalid(): boolean {
     return !!this.sireBlock.trim() && !/^\s*Sire\s*:/i.test(this.sireBlock);
   }
-  
+
   get isDamInvalid(): boolean {
     return !!this.damBlock.trim() && !/^\s*Dam\s*:/i.test(this.damBlock);
   }
-  
 
   setExtraSpot(value: string): void {
     this.extraSlot = value;
@@ -242,20 +251,18 @@ export class BreedingForms {
     this.cleanSelections();
   }
 
-
   private cleanSelections(): void {
     if (!this.canPair(this.sireBuild, this.damBuild)) this.damBuild = '';
     if (!this.suppItems.includes(this.litterSupps)) this.litterSupps = '';
     this.selectedBoosters = this.selectedBoosters.filter((b) => this.boosterItems.includes(b));
   }
 
-    // Does not allow spaces on usernames
+  // Does not allow spaces on usernames
   private cleanUsername(input: HTMLInputElement): string {
     const clean = input.value.replace(/\s/g, '');
     input.value = clean;
     return clean;
   }
-
 
   setFormType(value: FormType) {
     if (value === 'Main') {
@@ -280,7 +287,6 @@ export class BreedingForms {
     this.litterMode = value;
   }
 
-
   setUsername(input: HTMLInputElement): void {
     this.username = this.cleanUsername(input);
   }
@@ -294,16 +300,15 @@ export class BreedingForms {
     if (!checked) this.lastLineInbreeding = false;
   }
 
-
   setItemChecked(item: TraitItem, checked: boolean) {
     item.checked = checked;
-  if (checked && item.name === 'Devotion to the Spirits') {
-    item.increase = true;
-  } else if (!checked) {
-    item.bag = '';
-    item.increase = null;
-    item.target = '';
-  }
+    if (checked && item.name === 'Devotion to the Spirits') {
+      item.increase = true;
+    } else if (!checked) {
+      item.bag = '';
+      item.increase = null;
+      item.target = '';
+    }
   }
 
   toggleBooster(name: string, checked: boolean) {
@@ -341,7 +346,6 @@ export class BreedingForms {
     this.meelSprite = { checked: false, target: '' };
     this.breedingRollerFilled = false;
     this.breedingRollerLink = '';
-
   }
 
   generate() {
@@ -440,7 +444,6 @@ export class BreedingForms {
       errors.push('Enter the Filled Breeding Roller ID Link.');
     }
 
-
     if (errors.length > 0) {
       this.massRemove = '';
       this.result = `Please fix all the following errors before generating the form:<ul>${errors.map((error) => `<li>${error}</li>`).join('')}</ul>`;
@@ -506,7 +509,6 @@ export class BreedingForms {
       ? formatParentBlock(this.damBlock.trim(), 'Dam')
       : formatParentBlock(parentPlaceholder('Dam'), 'Dam', true);
 
-
     const firstPart = [
       ...sireLines,
       `**.**`,
@@ -566,7 +568,7 @@ export class BreedingForms {
       `**.**`,
       `**Using Extra Breeding Spot?** ${extraSlotLine}`,
       `**.**`,
-      filledBreedingRollerLine
+      filledBreedingRollerLine,
     ];
 
     const profile = [...firstPart, ...middlePart, ...lastPart].join('\n');

@@ -126,7 +126,7 @@
                 this is expected!
               </span>
             </label>
-        
+
             <textarea
               id="sireBlock"
               class="form-control"
@@ -138,12 +138,12 @@
               [placeholder]="parentPlaceholder('Sire')"
             ></textarea>
             @if (isSireInvalid) {
-              <span class="badge ms-1 text-bg-danger text-wrap text-start">
+              <span class="badge d-block w-100 mb-2 text-bg-danger">
                 The Sire Box must start with "Sire:"
               </span>
             }
           </div>
-        
+
           <div class="col-12 col-md-6">
             <label for="damBlock" class="form-label fw-semibold">
               Dam Block<br />
@@ -153,7 +153,7 @@
                 this is expected!
               </span>
             </label>
-        
+
             <textarea
               id="damBlock"
               class="form-control"
@@ -165,13 +165,13 @@
               [placeholder]="parentPlaceholder('Dam')"
             ></textarea>
             @if (isDamInvalid) {
-              <span class="badge ms-1 text-bg-danger text-wrap text-start">
+              <span class="badge d-block w-100 mb-2 text-bg-danger">
                 The Dam Box must start with "Dam:"
               </span>
             }
           </div>
         </div>
-        
+
       </div>
 
       @if (sireBuild && damBuild && !canPair(sireBuild, damBuild)) {
@@ -386,7 +386,7 @@
                   Use fertility supplements
                 </label>
               </div>
-          
+
               @if (usingSupps) {
                 <fieldset class="border rounded p-3 mt-3">
                   <legend class="float-none w-auto px-2 fs-6 fw-semibold">
@@ -442,7 +442,7 @@
                   Use a fertility root
                 </label>
               </div>
-          
+
               @if (usingRoot) {
                 <fieldset class="border rounded p-3 mt-3">
                   <legend class="float-none w-auto px-2 fs-6 fw-semibold">
@@ -484,7 +484,7 @@
               }
             </div>
           }
-          
+
         </div>
       </section>
 
@@ -503,7 +503,7 @@
               Use an extra breeding spot
             </label>
           </div>
-      
+
           @if (useExtraSpot) {
             <fieldset class="border rounded p-3 mt-3">
               <legend class="float-none w-auto px-2 fs-6 fw-semibold">
@@ -516,7 +516,7 @@
                   REQUIRED
                 </span>
               </legend>
-      
+
               <div class="row row-cols-1 row-cols-md-2 g-2">
                 @for (item of extraSlotOptions; track item; let i = $index) {
                   <div class="col">
@@ -539,7 +539,7 @@
                 }
               </div>
             </fieldset>
-      
+
             @if (extraSlot === talismanExtraSpot) {
               <fieldset class="border rounded p-3 mt-3">
                 <legend class="float-none w-auto px-2 fs-6 fw-semibold">
@@ -552,7 +552,7 @@
                     REQUIRED
                   </span>
                 </legend>
-      
+
                 <div class="row row-cols-1 row-cols-md-2 g-2">
                   @for (choice of talismanExtraSpotChoices; track choice; let index = $index) {
                     <div class="col">
@@ -585,18 +585,18 @@
           }
         </div>
       </section>
-      
+
 
       <section class="card bg-light mb-4" aria-label="Build supplements">
         <div class="card-body">
           <h2 class="h5 fw-bold mb-3">Build Boosters</h2>
-          
+
           @if(boostedByBarghest()){
             <span class="badge d-block w-100 mb-2 text-bg-success">
               BOOSTED BY BARGHEST
             </span>
           }
-          
+
           @if (boosterItems.length > 0) {
             <div class="row row-cols-1 row-cols-md-2 g-2">
               @for (item of boosterItems.sort(); track item) {
@@ -630,22 +630,22 @@
               <legend class="float-none w-auto px-2 fs-6 fw-semibold">{{ group.title }}</legend>
               <div class="row row-cols-1 row-cols-md-2 g-2">
                 @if (group.title.toLowerCase().includes('marking') && boostedByBarghest()) {
-                  <span class="badge ms-1 text-bg-success text-wrap text-start">
+                  <span class="badge d-block w-100 mb-2 text-bg-success">
                     BOOSTED BY BARGHEST
                   </span>
                 } @else if (group.title.toLowerCase().includes('gender')) {
-                  @if (!hasTraitCompanion('queens')) {
-                    <span class="badge ms-1 text-bg-warning text-wrap text-center">
+                  @if (genderTrait('queens blood')) {
+                    <span class="badge d-block w-100 mb-2 text-bg-warning">
                       TOKO ALREADY HAS QUEENS BLOOD<br>ALL PUPS WILL BE BORN FEMALE
                     </span>
                   }
-                  @if (!hasTraitCompanion('kings')) {
-                    <span class="badge ms-1 text-bg-warning text-wrap text-center">
+                  @if (genderTrait('kings blood')) {
+                    <span class="badge d-block w-100 mb-2 text-bg-warning">
                       TOKO ALREADY HAS KINGS BLOOD<br>ALL PUPS WILL BE BORN MALE
                     </span>
                   }
                 }
-                
+
                 @for (item of group.items; track item) {
                   <div class="col">
                     <div class="form-check">
@@ -837,7 +837,7 @@
                   </div>
                 </div>
               }
-            
+
           </div>
         </div>
       </section>

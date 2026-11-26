@@ -26,10 +26,10 @@ export const CONSUMABLE_EXTRA_SPOT_WORDS = ['Tea', 'Talisman', 'Starbarks'];
 // Consumable items for starters
 export const CONSUMABLE_ROOTS = ['Fertility Root', 'Homemade Fertility Root'];
 
-export const FACTIONS = ['PL', 'PB', 'LK', 'KS', 'WT', 'TB', 'Neutral'];
+export const FACTIONS = ['Neutral', 'PL', 'PB', 'LK', 'KS', 'WT', 'TB' ];
 
 // Items at 0 and 1 are items and are added to Mass Remove, rest are just Totems or companions
-// Order is important 
+// Order is important
 //  - Odonyx Force to use Breeder Box on the breeding
 //  - Makhata x Odonyx is Breeder Box, Makhata x Dakino
 export const SUPP_RULES: SuppRule[] = [
