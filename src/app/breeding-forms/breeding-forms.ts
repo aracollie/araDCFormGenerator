@@ -29,7 +29,7 @@ export class BreedingForms {
   protected damBuild: Build | '' = 'Tokota';
   formType: FormType = 'Main';
   username = '';
-  faction = 'Neutral';
+  faction = '';
   protected litterMode: LitterMode = 'full';
   protected potlTo: PotlTo | '' = '';
   splitPartner = '';
@@ -38,13 +38,15 @@ export class BreedingForms {
   rollInjuries = false;
   useTribeBonus = false;
   useExtraSpot = false;
+  usingSupps = false;
+  usingRoot = false;
+
   protected litterSupps = '';
   protected rootType = '';
   protected extraSlot = '';
   protected extraSlotChoice = '';
   protected readonly talismanExtraSpot = TALISMAN_EXTRA_SLOT;
   protected readonly talismanExtraSpotChoices = TALISMAN_EXTRA_SLOT_CHOICES;
-  usingRoot = false;
   protected selectedBoosters: string[] = [];
   protected selectedOther: string[] = [];
   protected traitItems: TraitItem[] = createTraitItems();
@@ -181,14 +183,32 @@ export class BreedingForms {
       var itemlc = item.toLowerCase();
       const combinedBlocks = `${this.sireBlock}\n${this.damBlock}`.toLowerCase();
       if (
-        CONSUMABLE_ROOTS.includes(itemlc) ||
+        CONSUMABLE_ROOTS.some(root => itemlc.includes(root.toLowerCase()))
+ ||
         itemlc.includes('totem') ||
+        itemlc.includes('supplements') ||
+        itemlc.includes('image') ||
         itemlc.includes('root') ||
+        itemlc.includes('talisman') ||
         this.suppItems.includes(itemlc)
       ) {
         return true;
       }
+      if(itemlc === "shikoku + shiba"){
+        if((this.sireBlock.includes("shiba") && this.sireBlock.includes("shikoku"))||
+          (this.damBlock.includes("shiba") && this.damBlock.includes("shikoku"))
+        ){
+          return true
+        }
+      }
       return combinedBlocks.includes(itemlc);
+    }
+  }
+
+  boostedByBarghest() : boolean{
+    if (!this.sireBlock.trim() || !this.damBlock.trim()) return false;
+    else{
+      return this.hasTraitCompanion('barghest');
     }
   }
 
@@ -200,6 +220,15 @@ export class BreedingForms {
     this.damBuild = d;
     this.cleanSelections();
   }
+
+  get isSireInvalid(): boolean {
+    return !!this.sireBlock.trim() && !/^\s*Sire\s*:/i.test(this.sireBlock);
+  }
+  
+  get isDamInvalid(): boolean {
+    return !!this.damBlock.trim() && !/^\s*Dam\s*:/i.test(this.damBlock);
+  }
+  
 
   setExtraSpot(value: string): void {
     this.extraSlot = value;
@@ -288,7 +317,7 @@ export class BreedingForms {
     this.sireBuild = 'Tokota';
     this.damBuild = 'Tokota';
     this.username = '';
-    this.faction = 'Neutral';
+    this.faction = '';
     this.litterMode = 'full';
     this.potlTo = '';
     this.splitPartner = '';
